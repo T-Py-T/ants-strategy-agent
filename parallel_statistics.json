@@ -1,0 +1,46 @@
+[
+  {
+    "test_name": "vs RandomBot",
+    "timestamp": "2025-09-16_00-36-39",
+    "games": 20,
+    "wins": 20,
+    "losses": 0,
+    "draws": 0,
+    "win_rate": 100.00,
+    "average_turns": 1.00,
+    "max_parallel": 5
+  },
+  {
+    "test_name": "vs HunterBot",
+    "timestamp": "2025-09-16_00-36-39",
+    "games": 20,
+    "wins": 0,
+    "losses": 0,
+    "draws": 20,
+    "win_rate": 0,
+    "average_turns": 251.50,
+    "max_parallel": 5
+  },
+  {
+    "test_name": "vs GreedyBot",
+    "timestamp": "2025-09-16_00-36-39",
+    "games": 20,
+    "wins": 0,
+    "losses": 0,
+    "draws": 20,
+    "win_rate": 0,
+    "average_turns": 335.80,
+    "max_parallel": 5
+  },
+  {
+    "test_name": "vs LeftyBot",
+    "timestamp": "2025-09-16_00-36-39",
+    "games": 20,
+    "wins": 0,
+    "losses": 0,
+    "draws": 20,
+    "win_rate": 0,
+    "average_turns": 695.85,
+    "max_parallel": 5
+  }
+]

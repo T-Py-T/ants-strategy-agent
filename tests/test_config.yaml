@@ -1,0 +1,103 @@
+# AntsAIBot Test Configuration
+# Defines test scenarios, maps, and bot configurations
+
+# Test scenarios
+scenarios:
+  quick:
+    name: "Quick Test"
+    description: "Fast 30-turn test for basic functionality"
+    turns: 30
+    maps: ["maps/maze/maze_02p_01.map"]
+    bots: ["src/bots/bot.py", "src/sample_bots/python/RandomBot.py"]
+    timeout: 30
+
+  standard:
+    name: "Standard Test"
+    description: "Standard 1000-turn test against sample bots"
+    turns: 1000
+    maps: ["maps/maze/maze_02p_01.map"]
+    bots: ["src/bots/bot.py", "src/sample_bots/python/RandomBot.py"]
+    timeout: 60
+
+  four_player:
+    name: "Four Player Test"
+    description: "Four-player game with mixed opponents"
+    turns: 1000
+    maps: ["maps/maze/maze_04p_01.map"]
+    bots: 
+      - "src/bots/bot.py"
+      - "src/sample_bots/python/RandomBot.py"
+      - "src/sample_bots/python/HunterBot.py"
+      - "src/sample_bots/python/GreedyBot.py"
+    timeout: 90
+
+  self_play:
+    name: "Self Play Test"
+    description: "Bot plays against itself"
+    turns: 1000
+    maps: ["maps/maze/maze_04p_01.map"]
+    bots: 
+      - "src/bots/bot.py"
+      - "src/bots/bot.py"
+      - "src/bots/bot.py"
+      - "src/bots/bot.py"
+    timeout: 90
+
+  benchmark:
+    name: "Benchmark Suite"
+    description: "Performance benchmark against all sample bots"
+    turns: 1000
+    maps: 
+      - "maps/maze/maze_02p_01.map"
+      - "maps/maze/maze_02p_02.map"
+      - "maps/maze/maze_04p_01.map"
+    opponents:
+      - "src/sample_bots/python/RandomBot.py"
+      - "src/sample_bots/python/HunterBot.py"
+      - "src/sample_bots/python/GreedyBot.py"
+      - "src/sample_bots/python/LeftyBot.py"
+    games_per_opponent: 5
+    timeout: 300
+
+# Map configurations
+maps:
+  small:
+    - "maps/maze/maze_02p_01.map"
+    - "maps/maze/maze_02p_02.map"
+  
+  medium:
+    - "maps/maze/maze_04p_01.map"
+    - "maps/maze/maze_04p_02.map"
+  
+  large:
+    - "maps/multi_hill_maze/multi_hill_01.map"
+    - "maps/multi_hill_maze/multi_hill_02.map"
+
+# Bot configurations
+bots:
+  sample_bots:
+    - "src/sample_bots/python/RandomBot.py"
+    - "src/sample_bots/python/HunterBot.py"
+    - "src/sample_bots/python/GreedyBot.py"
+    - "src/sample_bots/python/LeftyBot.py"
+    - "src/sample_bots/python/HoldBot.py"
+  
+  test_bots:
+    - "src/bots/bot.py"
+    - "submission_test/TestBot.py"
+
+# Performance thresholds
+performance:
+  min_win_rate: 0.3  # Minimum win rate against RandomBot
+  max_avg_turns: 800  # Maximum average turns per game
+  max_avg_time: 45    # Maximum average time per game (seconds)
+
+# Test environment settings
+environment:
+  python_path: "."
+  log_dir: "game_logs"
+  benchmark_dir: "benchmark_results"
+  verbose: true
+  end_wait: 0.25
+  engine_seed: 42
+  player_seed: 42

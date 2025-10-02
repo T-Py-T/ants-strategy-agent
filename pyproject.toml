@@ -1,0 +1,26 @@
+[project]
+name = "antsaibot"
+version = "0.1.0"
+description = "Ants AI Challenge Python Bot and Engine"
+authors = [
+    {name = "Your Name", email = "your.email@example.com"}
+]
+readme = "README.md"
+requires-python = ">=3.8"
+
+dependencies = [
+    "colorama",
+    "pytest",
+    "pandas",
+    "numpy",
+    "matplotlib",
+    "seaborn",
+    "scipy"
+]
+
+[tool.uv]
+# Add UV-specific configuration here if needed
+
+[build-system]
+requires = ["setuptools>=45", "wheel"]
+build-backend = "setuptools.build_meta" 

@@ -222,6 +222,9 @@ def main(argv):
     parser.add_option("--nolaunch", dest="nolaunch",
                       action='store_true', default=False,
                       help="Prevent visualizer from launching")
+    parser.add_option("--json", dest="json_output",
+                      action='store_true', default=False,
+                      help="Output game results as JSON to stdout")
     log_group.add_option("--html", dest="html_file",
                          default=None,
                          help="Output file name for an html replay")
@@ -430,6 +433,11 @@ def run_rounds(opts,args):
             real_replay_io.write(json.dumps(replay_json))
             intcpt_replay_io.close()
             engine_options['replay_log'] = real_replay_io
+
+        # Output JSON result if requested
+        if opts.json_output:
+            result['playernames'] = [get_cmd_name(arg) for arg in args]
+            print(json.dumps(result, sort_keys=True))
 
         # close file descriptors
         if engine_options['stream_log']:

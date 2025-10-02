@@ -1,478 +1,271 @@
-"""Bot for Google's Ants AI Challenge
+#!/usr/bin/env python
+from ants import *
 
-written by: Tim Whitson
+# ============================================================================
+# LEARNED WINNING BOT - Based on LeftyBot + GreedyBot insights
+# ============================================================================
 
-Influence
----------
-
-This bot uses an influence/heat map. Each item of interest (food, hill, etc.)
-creats influence, which propagates over the map. Some tiles will have
-negative influence, such as impassable tiles and tiles with large
-enemy influence.
-
-Rather than having each ant route tracing, the ants simply move into
-the tile with the largest influence.
-
-
-Exploration
------------
-
-Food tiles have large influence. They only affect one ant, however. This 
-hopefully creates emergent behavior so the ants spread out to find food.
-
-Tiles within the edges of visibility for each ant are also tracked. If they
-have not been seen within 5 turns, they also influence the ant to continue
-moving forward.
-
-
-Combat
-------
-
-This bot's combat is not sophisticated. It looks for enemy/ally influence
-and tries to avoid any particularly bad situation. It also will sometimes
-capitalize on enemy weaknesses.
-
-
-Waves
------
-
-Once enough ants are present, a large influencer (wave) is generated that
-moves toward the enemy spawn. The idea is to collect the ants and move them
-in a cohesive unit toward the enemy hill. Momentum is also important as 
-ants in motion are less likely to be killed and can explore/pick up food.
-"""
-
-from src.ants.ants import *
-
-# from ants.py
-ANTS = 0
-DEAD = -1
-LAND = -2
-FOOD = -3
-WATER = -4
-
-# custom
-MY_HILL = 10
-ALLY_ANT = 20
-ENEMY_HILL = 30
-ENEMY_ANT = 40
-WAVE = 50
-NOT_VISIBLE = 60
-
-# how strongly each item influence ants
-influence_values = {
-    FOOD: 20,
-    ENEMY_HILL: 50,
-    WAVE: 5,
-    NOT_VISIBLE: 0.1
-}
-
-# total number of ants each individual item can influence
-number_of_influences = {
-    FOOD: 1,
-    WAVE: 2,
-    NOT_VISIBLE: 1,
-    MY_HILL: 4
-}
-
-stop_propagation = [WATER]
-stop_locs = set()
-
-blocked = [FOOD, WATER]
-
-nrows = 0
-ncols = 0
-
-def wrap_loc(loc):
-    """Wrap location around map
+class AdvancedBot:
     """
-    r, c = loc
-    return (r % nrows, c % ncols)
-
-
-class Wave:
-    """Line of influence, that moves N/S depending on start location
-    bringing a wave of ants
+    More Aggressive WINNING BOT - Designed to BEAT LeftyBot
+    
+    Key insights from studying LeftyBot:
+    - LeftyBot's strength: Systematic exploration with wall-following
+    - LeftyBot's weakness: No direct food hunting, relies on exploration luck
+    - Our advantage: We can be MORE aggressive about food collection AND exploration
+    
+    Strategy to beat LeftyBot:
+    1. More Aggressive food hunting (closer distances, more ants)
+    2. More Aggressive multiplication (return to hill more frequently)
+    3. Better exploration than LeftyBot (multiple exploration patterns)
+    4. Strategic combat (hunt enemy ants when we have advantage)
     """
-    def __init__(self, left, width=4):
-        locs = [left]
-        for i in range(1, width + 1):
-            locs.append((left[0], left[1] + i))
-            
-        self.locs = locs
-        
-    def move(self, direction):
-        move = {
-            'n': (-1, 0),
-            's': (1, 0),
-            'e': (0, 1),
-            'w': (0, -1)
-        }[direction]
-        
-        self.locs = [wrap_loc((l[0] + move[0], l[1] + move[1])) for l in self.locs]
-
-
-class IForOneWelcomeOurNewInsectOverlords:
-    # store hill locations since they do not move on this map
-    my_hill = None
-    enemy_hill = None
-    waves = []
-    wave_dir = None
     
-    def do_setup(self, ants):
-        """Set initial variables
-        """
-        self.view_distance = sqrt(ants.viewradius2)
-        self.visibility_map = self.map_zeros(ants.map)
+    def __init__(self):
+        self.ants_straight = {}  # Ants moving in straight lines (from LeftyBot)
+        self.ants_lefty = {}     # Ants following walls (from LeftyBot)
+        self.standing_orders = []  # Continue tasks across turns (from GreedyBot)
+        self.turn_count = 0
         
-        global nrows, ncols
-        nrows = len(self.visibility_map)
-        ncols = len(self.visibility_map[0])
-
-    def map_zeros(self, amap):
-        """Create map of zeroes the same size as given
-        """
-        zm = [0] * len(amap)
-        
-        for i in range(len(amap)):
-            zm[i] = [0] * len(amap[0])
-            
-        return zm
-
-    def update_visibility(self, ants):
-        """Update locations that have been seen as 0,
-        increment locations that are not visible (number of turns that loc was not visible)
-        """
-        ants.visible((0, 0)) # must be called to instantiate vision map
-        
-        for r, row in enumerate(ants.vision):
-            for c, visible in enumerate(row):
-                if visible:
-                    self.visibility_map[r][c] = 0
-                else:
-                    self.visibility_map[r][c] += 1
-        
-    def set_stop_locs(self, amap):
-        """Locations that stop propagation of the BFS
-        ie. water
-        """
-        for r, row in enumerate(amap):
-            for c, col in enumerate(amap[r]):
-                if col in stop_propagation:
-                    stop_locs.add((r, c))
-        
-    def influence_locs(self, amap):
-        """Iterate over map, if tile value (hills, food, etc)
-        has influence value, add to list
-        """
-        locs = []
-    
-        for r, row in enumerate(amap):
-            for c, col in enumerate(row):
-                if col in influence_values:
-                    locs.append(((r, c), influence_values[col]))
-                    
-        return locs
-        
-    def add_to_map(self, amap, locs, value):
-        """Add custom values to ants map
-        
-        ie. to differentiate between ally and enemy ants
-        """
-        for r, c in locs:
-            amap[r][c] = value
-            
-        return amap
-
-    def map_influence(self, amap, locs, my_ants):
-        """Breadth-first search to create influence map. A starting point is
-        given and each subsequent move (1-tile away) is stored as a list. The
-        index of each list in the list of lists is its distance.
-        
-                            3
-                          3 2 3
-                        3 2 1 2 3
-                          3 2 3
-                            3
-                            
-        If maximum number of ants is reached, stop propagation.
-        """
-        def build_influence(start_loc):
-            influence_locs = [[start_loc]]
-            queue = [start_loc]
-            old_locs = {start_loc} # use set for improved performance
-            num_ants = 0
-            max_ants = number_of_influences.get(amap[start_loc[0]][start_loc[1]], len(my_ants))
-
-            while True:
-                new_locs = []
-                
-                for loc in queue:
-                    for direction in [(0, 1), (0, -1), (1, 0), (-1, 0)]:
-                        add = (loc[0] + direction[0], loc[1] + direction[1])
-                        add = wrap_loc(add)
-                            
-                        stop = add in stop_locs
-                        
-                        if add in my_ants:
-                            num_ants += 1
-                            
-                            if num_ants >= max_ants:
-                                influence_locs.append(new_locs)
-                                return influence_locs
-
-                        if add not in old_locs and not stop:
-                            old_locs.add(add)
-                            new_locs.append(add)
-                        
-                queue = new_locs
-                
-                if not queue:
-                    return influence_locs
-                
-                influence_locs.append(new_locs)
-
-            return influence_locs
-            
-        influences = [(build_influence(loc), strength) for loc, strength in locs]
-        return influences
-        
-    def add_influence(self, imap, influences):
-        """Add influence values to blank map (map of zeros)
-        """
-        for influence, strength in influences:
-            for dist, locs in enumerate(influence):
-                for loc in locs:
-                    r, c = loc
-                    val = strength / (dist + 1)
-                    imap[r][c] += val
-            
-        return imap
-        
-    def locs_within(self, loc, distance, true_distance=False):
-        """Get all locations within distance from loc
-        """
-        locs = []
-        for r in range(loc[0] - distance, loc[0] + distance + 1):
-            for c in range(loc[1] - distance, loc[1] + distance + 1):
-                compare = distance + 1 if true_distance else distance
-                if abs(loc[0] - r) + abs(loc[1] - c) <= compare:
-                    locs.append(wrap_loc((r, c)))
-                    
-        return locs
-        
-    def edge_locs(self, locs, ants):
-        """Retrieve the edges of visibility for each ant
-        """
-        distance = int(self.view_distance) + 1
-        edges = set()
-        
-        for loc in locs:
-            for r in range(loc[0] - distance, loc[0] + distance + 1):
-                for c in range(loc[1] - distance, loc[1] + distance + 1):
-                    if abs(loc[0] - r) + abs(loc[1] - c) == distance:
-                        edge_loc = wrap_loc((r, c))
-                        if self.visibility_map[edge_loc[0]][edge_loc[1]] >= 5:
-                            edges.add(edge_loc)
-                    
-        return edges
-        
-    def combat_map(self, mmap, my_ants, enemy_ants, ants):
-        """Set locs on map related to combat
-        
-        These locs work differently from the rest. They do not propagate.
-        The idea is to set low (unmoveable) values on tiles where an ant
-        is sure to be killed.
-        """
-        kill_radius = 2
-        die_locs = []
-        
-        # enemies influence each possible square they could attack the next turn
-        for loc in enemy_ants:
-            move_locs = self.locs_within(loc, 1)
-            enemy_moves = set()
-            for move_loc in move_locs:
-                enemy_moves.update(self.locs_within(move_loc, kill_radius, true_distance=True))
-                
-            die_locs.extend(enemy_moves)
-
-        for r, c in die_locs:
-            mmap[r][c] -= 150
-            
-        # use only ants that are within reasonable distance of enemies (move + attack + enemy move = 1 + 2 + 1 = 4)
-        my_eligible_ants = [a for a in my_ants if any([ants.distance(a, e) <= (kill_radius + 2) for e in enemy_ants])]
-            
-        attack_locs = []
-            
-        # influence only one tile away, unless touching another ant
-        for loc in my_eligible_ants:
-            ants_touching = any([ants.distance(loc, a) == 1 for a in my_eligible_ants])
-            ally_moves = self.locs_within(loc, 1, true_distance=ants_touching)
-            attack_locs.extend(ally_moves)
-            
-        for loc in attack_locs:
-            if loc in die_locs:
-                r, c = loc
-                mmap[r][c] += 100
-            
-        return mmap
-        
-    def hill_defense(self, enemy_ants, ants, standoff=7):
-        """Determine whether or not hill needs defending
-        """
-        if not ants.visible(self.my_hill) or any([ants.distance(e, self.my_hill) <= standoff for e in enemy_ants]):
-            return [((self.my_hill), 50)]
-        else:
-            return []
-            
-    def issue_orders(self, my_ants, ants, mmap):
-        """Loop through queue of ants, removing them if they have a valid space to move into.
-        """
-        prev_destinations = set()
-        
-        level = 0
-        turns_without_order = 0 
-    
-        while my_ants:
-            loc = my_ants.pop(0)
-
-            # look for marker in queue, if so the following ants will choose their next best spot
-            # also check if too many turns have passed without issuing an order (this typically
-            # happens if ants want to move into each other's space)
-            if loc == None or turns_without_order >= len(my_ants) + 1:
-                level += 1
-                if level > 4:
-                    break
-                else:
-                    continue
-            
-            # add current loc to possible directions
-            directions = ['n', 's', 'e', 'w']
-            surrounding = [ants.destination(loc, d) for d in directions] + [loc]
-            directions += ['stay']
-            
-            # sort by best score
-            influences = [mmap[r][c] for r, c in surrounding]
-            max_idx = [i for _, i in sorted(zip(influences, range(len(influences))), reverse=True)][level]
-            destination = directions[max_idx]
-
-            # highest influence is current spot
-            if destination == 'stay':
-                prev_destinations.add(loc)
-                continue
-            
-            move_loc = surrounding[max_idx]
-            
-            # if moving into a square where another ant currently is, move to back of queue
-            if move_loc in my_ants:
-                my_ants.append(loc)
-                turns_without_order += 1
-                continue
-            
-            # trying to move into a space another ant has already chosen, append marker to queue
-            elif move_loc in prev_destinations:
-                if not None in my_ants:
-                    my_ants.append(None)
-                my_ants.append(loc)
-                continue
-                
-            # go!
+    def get_initial_direction(self, a_row, a_col):
+        """Get initial direction for new ants based on position (from LeftyBot)"""
+        if a_row % 2 == 0:
+            if a_col % 2 == 0:
+                return 'n'
             else:
-                prev_destinations.add(move_loc)
-                turns_without_order = 0
-                ants.issue_order((loc, destination))
-
+                return 's'
+        else:
+            if a_col % 2 == 0:
+                return 'e'
+            else:
+                return 'w'
+    
     def do_turn(self, ants):
-        """Baked in turn function
-        """
-        self.update_visibility(ants)
-       
-        amap = ants.map
-        food = ants.food()
-        my_ants = ants.my_ants()
+        """Combined LeftyBot exploration + GreedyBot priority system"""
+        self.turn_count += 1
+        destinations = []
+        new_straight = {}
+        new_lefty = {}
+        orders = []
+        hunted = []
         
-        # add hills if not already added
-        if not self.my_hill:
-            self.my_hill = ants.my_hills()[0]
+        # Continue standing orders from previous turn (from GreedyBot)
+        for order in self.standing_orders:
+            ant_loc, step_loc, dest_loc, order_type = order
+            if ((order_type == HILL and dest_loc in ants.enemy_hills()) or
+                    (order_type == FOOD and dest_loc in ants.food()) or
+                    (order_type == ANTS and dest_loc in ants.enemy_ants()) or
+                    (order_type == UNSEEN and ants.map[dest_loc[0]][dest_loc[1]] == UNSEEN)):
+                self.do_order(ants, order_type, ant_loc, dest_loc, destinations, hunted, orders)
+        
+        origins = [order[0] for order in orders]
+        
+        # More Aggressive priority system to beat LeftyBot
+        for a_row, a_col in ants.my_ants():
+            if (a_row, a_col) not in origins:
+                # PRIORITY 1: Return to hill for multiplication (More Aggressive)
+                if self.return_to_hill(ants, a_row, a_col, destinations, hunted, orders):
+                    continue
+                
+                # PRIORITY 2: Hunt enemy hills (strategic)
+                if self.hunt_hills(ants, a_row, a_col, destinations, hunted, orders):
+                    continue
+                
+                # PRIORITY 3: Hunt food (More Aggressive)
+                if self.hunt_food(ants, a_row, a_col, destinations, hunted, orders):
+                    continue
+                
+                # PRIORITY 4: Hunt enemy ants (strategic combat)
+                if self.hunt_ants(ants, a_row, a_col, destinations, hunted, orders):
+                    continue
+                
+                # PRIORITY 5: Hunt unseen areas (exploration)
+                if self.hunt_unseen(ants, a_row, a_col, destinations, hunted, orders):
+                    continue
+                
+                # PRIORITY 6: Use LeftyBot's exploration strategy (but better)
+                self.wall_following_strategy(ants, a_row, a_col, destinations, new_straight, new_lefty)
+        
+        # Update tracking dictionaries (from LeftyBot)
+        self.ants_straight = new_straight
+        self.ants_lefty = new_lefty
+        self.standing_orders = orders
+        
+        # Update standing orders for next turn (from GreedyBot)
+        for order in self.standing_orders:
+            order[0] = order[1]
+    
+    def hunt_hills(self, ants, a_row, a_col, destinations, hunted, orders):
+        """Find and move toward closest enemy hill"""
+        closest_enemy_hill = ants.closest_enemy_hill(a_row, a_col)
+        if closest_enemy_hill is not None:
+            return self.do_order(ants, HILL, (a_row, a_col), closest_enemy_hill, destinations, hunted, orders)
+        return False
+    
+    def hunt_food(self, ants, a_row, a_col, destinations, hunted, orders):
+        """More Aggressive food hunting to beat LeftyBot"""
+        closest_food = ants.closest_food(a_row, a_col, hunted)
+        if closest_food is not None:
+            # More Aggressive: Hunt food from much further away than LeftyBot
+            distance = ants.distance(a_row, a_col, closest_food[0], closest_food[1])
+            my_ants = ants.my_ants()
+            total_ants = len(my_ants)
             
-            if self.my_hill[0] > 21:
-                self.wave_dir = 'n'
+            # Be more aggressive when we have fewer ants (critical for beating LeftyBot)
+            if total_ants <= 5:
+                max_distance = 50  # Very aggressive when we need to catch up
+            elif total_ants <= 10:
+                max_distance = 40  # Still very aggressive
+            elif total_ants <= 20:
+                max_distance = 35  # Aggressive
             else:
-                self.wave_dir = 's'
-           
-        if not self.enemy_hill and ants.enemy_hills():
-            self.enemy_hill = ants.enemy_hills()[0][0]
-        
-        enemy_ants = [a[0] for a in ants.enemy_ants()]
-        
-        # add/remove waves if there are enough ants
-        if len(my_ants) >= 10:
-            if not self.waves:
-                self.waves.append(Wave((0, 5), 11))
-                self.waves.append(Wave((0, 23), 11))
-        else:
-            self.waves = []
-        
-        # influence map (zeros)
-        imap = self.map_zeros(amap)
-
-        # create spots which stop propagation, such as water
-        self.set_stop_locs(amap)
-
-        # add custom locs to map for influencing
-        amap = self.add_to_map(amap, my_ants, ALLY_ANT)
-        if self.my_hill:
-            amap = self.add_to_map(amap, [self.my_hill], MY_HILL)
+                max_distance = 30  # Still aggressive even with many ants
             
-        amap = self.add_to_map(amap, enemy_ants, ENEMY_ANT)
-        if self.enemy_hill:
-            amap = self.add_to_map(amap, [self.enemy_hill], ENEMY_HILL)
+            if distance <= max_distance:
+                return self.do_order(ants, FOOD, (a_row, a_col), closest_food, destinations, hunted, orders)
+        return False
+    
+    def hunt_ants(self, ants, a_row, a_col, destinations, hunted, orders):
+        """More Aggressive enemy ant hunting to beat LeftyBot"""
+        closest_enemy_ant = ants.closest_enemy_ant(a_row, a_col, hunted)
+        if closest_enemy_ant is not None:
+            # Only hunt enemy ants if we have more ants than them (strategic advantage)
+            my_ants = ants.my_ants()
+            enemy_ants = ants.enemy_ants()
+            if len(my_ants) > len(enemy_ants):
+                distance = ants.distance(a_row, a_col, closest_enemy_ant[0], closest_enemy_ant[1])
+                # Hunt enemy ants from far away when we have advantage
+                if distance <= 25:
+                    return self.do_order(ants, ANTS, (a_row, a_col), closest_enemy_ant, destinations, hunted, orders)
+        return False
+    
+    def return_to_hill(self, ants, a_row, a_col, destinations, hunted, orders):
+        """More Aggressive hill return for maximum multiplication"""
+        my_hills = ants.my_hills()
+        if not my_hills:
+            return False
         
-        # get influence locations from ants map
-        ilocs = self.influence_locs(amap)
+        # Find closest hill
+        closest_hill = min(my_hills, key=lambda hill: ants.distance(a_row, a_col, hill[0], hill[1]))
+        distance_to_hill = ants.distance(a_row, a_col, closest_hill[0], closest_hill[1])
         
-        # waves
-        for wave in self.waves:
-            wave.move(self.wave_dir)    
-            for i, loc in enumerate(wave.locs):
-                ilocs.append((loc, influence_values[WAVE]))
+        my_ants = ants.my_ants()
+        total_ants = len(my_ants)
+        enemy_ants = ants.enemy_ants()
+        enemy_count = len(enemy_ants)
+        
+        # More Aggressive multiplication strategy to beat LeftyBot
+        if total_ants <= 20:  # Very aggressive when we have few ants
+            return self.do_order(ants, HILL, (a_row, a_col), closest_hill, destinations, hunted, orders)
+        
+        # Return to hill if we're losing the ant race
+        if enemy_count > total_ants:
+            return self.do_order(ants, HILL, (a_row, a_col), closest_hill, destinations, hunted, orders)
+        
+        # Return to hill if we're close enough
+        if distance_to_hill <= 15:  # Very aggressive distance
+            return self.do_order(ants, HILL, (a_row, a_col), closest_hill, destinations, hunted, orders)
+        
+        return False
+    
+    def hunt_unseen(self, ants, a_row, a_col, destinations, hunted, orders):
+        """Find and move toward closest unseen area"""
+        closest_unseen = ants.closest_unseen(a_row, a_col, hunted)
+        if closest_unseen is not None:
+            return self.do_order(ants, UNSEEN, (a_row, a_col), closest_unseen, destinations, hunted, orders)
+        return False
+    
+    def do_order(self, ants, order_type, loc, dest, destinations, hunted, orders):
+        """Execute an order (from GreedyBot)"""
+        a_row, a_col = loc
+        directions = ants.direction(a_row, a_col, dest[0], dest[1])
+        
+        for direction in directions:
+            (n_row, n_col) = ants.destination(a_row, a_col, direction)
+            if (not (n_row, n_col) in destinations and
+                ants.unoccupied(n_row, n_col)):
+                ants.issue_order((a_row, a_col, direction))
+                destinations.append((n_row, n_col))
+                hunted.append(dest)
+                orders.append([loc, (n_row, n_col), dest, order_type])
+                return True
+        return False
+    
+    def wall_following_strategy(self, ants, a_row, a_col, destinations, new_straight, new_lefty):
+        """IMPROVED wall-following exploration strategy to beat LeftyBot"""
+        # Send new ants in a straight line
+        if (not (a_row, a_col) in self.ants_straight and
+                not (a_row, a_col) in self.ants_lefty):
+            direction = self.get_initial_direction(a_row, a_col)
+            new_straight[(a_row, a_col)] = direction
 
-        # add vision/edge influencers
-        ilocs += [(loc, NOT_VISIBLE) for loc in self.edge_locs(my_ants, ants)]
-        
-        # check if hill needs defending
-        ilocs += self.hill_defense(enemy_ants, ants)
-        
-        # influence list of lists
-        influence = self.map_influence(amap, ilocs, my_ants)
-        
-        # add all influencers to map of zeros
-        mmap = self.add_influence(imap, influence)
-        
-        # prevent ants from moving to where they will die
-        mmap = self.combat_map(mmap, my_ants, enemy_ants, ants)
-        
-        # food/water tiles are blocking, so prevent movement to them
-        for r, row in enumerate(amap):
-            for c, tile in enumerate(row):
-                if tile in blocked:
-                    mmap[r][c] = -10000
-                    
-        self.issue_orders(my_ants, ants, mmap)
-       
-            
+        # Send ants going in a straight line in the same direction
+        if (a_row, a_col) in self.ants_straight:
+            direction = self.ants_straight[(a_row, a_col)]
+            n_row, n_col = ants.destination(a_row, a_col, direction)
+            if ants.passable(n_row, n_col):
+                if (ants.unoccupied(n_row, n_col) and
+                        not (n_row, n_col) in destinations):
+                    ants.issue_order((a_row, a_col, direction))
+                    new_straight[(n_row, n_col)] = direction
+                    destinations.append((n_row, n_col))
+                else:
+                    # IMPROVEMENT: Try alternative directions instead of just turning
+                    for alt_dir in [LEFT[direction], RIGHT[direction]]:
+                        alt_row, alt_col = ants.destination(a_row, a_col, alt_dir)
+                        if (ants.passable(alt_row, alt_col) and
+                                ants.unoccupied(alt_row, alt_col) and
+                                not (alt_row, alt_col) in destinations):
+                            ants.issue_order((a_row, a_col, alt_dir))
+                            new_straight[(alt_row, alt_col)] = alt_dir
+                            destinations.append((alt_row, alt_col))
+                            break
+                    else:
+                        # pause ant, turn and try again next turn
+                        new_straight[(a_row, a_col)] = LEFT[direction]
+                        destinations.append((a_row, a_col))
+            else:
+                # hit a wall, start following it
+                new_lefty[(a_row, a_col)] = RIGHT[direction]
+
+        # Send ants following a wall, keeping it on their left
+        if (a_row, a_col) in self.ants_lefty:
+            direction = self.ants_lefty[(a_row, a_col)]
+            directions = [LEFT[direction], direction, RIGHT[direction], BEHIND[direction]]
+            # try 4 directions in order, attempting to turn left at corners
+            for new_direction in directions:
+                n_row, n_col = ants.destination(a_row, a_col, new_direction)
+                if ants.passable(n_row, n_col):
+                    if (ants.unoccupied(n_row, n_col) and
+                            not (n_row, n_col) in destinations):
+                        ants.issue_order((a_row, a_col, new_direction))
+                        new_lefty[(n_row, n_col)] = new_direction
+                        destinations.append((n_row, n_col))
+                        break
+                    else:
+                        # IMPROVEMENT: Try alternative directions when blocked
+                        for alt_dir in [LEFT[new_direction], RIGHT[new_direction]]:
+                            alt_row, alt_col = ants.destination(a_row, a_col, alt_dir)
+                            if (ants.passable(alt_row, alt_col) and
+                                    ants.unoccupied(alt_row, alt_col) and
+                                    not (alt_row, alt_col) in destinations):
+                                ants.issue_order((a_row, a_col, alt_dir))
+                                new_lefty[(alt_row, alt_col)] = alt_dir
+                                destinations.append((alt_row, alt_col))
+                                break
+                        else:
+                            # have ant wait until it is clear
+                            new_straight[(a_row, a_col)] = RIGHT[direction]
+                            destinations.append((a_row, a_col))
+                        break
+
 if __name__ == '__main__':
-    # psyco will speed up python a little, but is not needed
     try:
         import psyco
         psyco.full()
     except ImportError:
         pass
-    
     try:
-        # if run is passed a class with a do_turn method, it will do the work
-        # this is not needed, in which case you will need to write your own
-        # parsing function and your own game state class
-        Ants.run(IForOneWelcomeOurNewInsectOverlords())
+        Ants.run(AdvancedBot())
     except KeyboardInterrupt:
         print('ctrl-c, leaving ...')
