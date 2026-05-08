@@ -52,6 +52,42 @@ The bot is functional but still underperforming against advanced opponents. Here
 | GreedyBot | Loss (16 vs 31 ants) | Food collection strategy needs work |
 | HunterBot | Loss (6 vs 4 ants) | Combat mechanics need refinement |
 | LeftyBot | Loss (11 vs 52 ants) | Exploration strategy needs improvement |
+| **XathisBot** | **Loss (final boss)** | Port of the AI Challenge 2011 winner — see below |
+
+### The "Final Boss": XathisBot
+
+`src/bots/xathis_bot.py` is a Python port of the **AI Challenge 2011 winner**
+("xathis", written in Java). The original source and the recovered postmortem
+live at `docs/reference/xathis/`. xathis uses the same general phases as a
+strong scripted bot (food BFS, exploration, hill attack, defence) but adds
+two things that pushed it past every other entry in the world:
+
+1. **Diffusion-based exploration** — every tile accumulates a "fog" value over
+   time; ants are pulled toward the highest-value frontier (`_init_explore`
+   + `_explore`).
+2. **Group-based combat with minimax** — ants in mutual gamma-distance form a
+   "fight group"; we exhaustively search every (my_combo × enemy_combo) and
+   pick the move that maximises `(enemy_dead − my_dead)` under the official
+   battle-resolution rule (`_fight`).
+
+Empirical (3 games × 500 turns on `random_walk_02p_01`):
+
+| Opponent | XathisBot wins | XathisBot losses | Draws |
+|----------|---:|---:|---:|
+| RandomBot | 3 | 0 | 0 |
+| HoldBot   | 3 | 0 | 0 |
+| HunterBot | 3 | 0 | 0 |
+| GreedyBot | 3 | 0 | 0 |
+| LeftyBot  | 3 | 0 | 0 |
+| 4-Player  | 3 | 0 | 0 |
+
+That's the bar: any successor (the ML/RL bot you're planning) must beat
+xathis_bot to be world-class. Try it yourself:
+
+```bash
+make test-vs-xathis      # one head-to-head game with replay
+make benchmark-xathis    # full benchmark suite, xathis under test
+```
 
 ## Testing & Evaluation
 

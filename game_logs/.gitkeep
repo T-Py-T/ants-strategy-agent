@@ -1,0 +1,3 @@
+# Keep this directory tracked even though its contents (.replay/.html
+# files) are gitignored. The README's Project Structure tree references
+# game_logs/ as the runtime output location for replay files.

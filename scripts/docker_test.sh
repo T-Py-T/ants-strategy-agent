@@ -106,7 +106,7 @@ case "${1:-help}" in
         
         # Run benchmark in Docker
         run_docker_test "Benchmark Suite" \
-            "chmod +x scripts/benchmark.sh && ./scripts/benchmark.sh"
+            "python3 scripts/benchmark.py"
         
         echo -e "${GREEN}Docker benchmark completed!${NC}"
         ;;

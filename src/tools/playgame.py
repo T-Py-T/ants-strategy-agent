@@ -444,6 +444,42 @@ def run_rounds(opts,args):
         if opts.json_output:
             result['playernames'] = [get_cmd_name(arg) for arg in args]
             print(json.dumps(result, sort_keys=True))
+        else:
+            # Always print one human-readable RESULT line per game so callers
+            # (and humans) can tell who won. Format is intentionally stable so
+            # benchmark scripts can parse it without grepping the replay file.
+            #
+            # Example:
+            #   RESULT game_id=0 turns=487 winner=player_0 player_0=bot.py:rank=0,score=4,status=survived ...
+            try:
+                player_names = [get_cmd_name(arg) for arg in args]
+                scores = result.get('score', [])
+                statuses = result.get('status', [])
+                ranks = result.get('rank', [])
+                turns = result.get('game_length', 0)
+                if ranks:
+                    top_rank = min(ranks)
+                    top_players = [i for i, r in enumerate(ranks) if r == top_rank]
+                    if len(top_players) == 1:
+                        winner = "player_{0}".format(top_players[0])
+                    else:
+                        winner = "tie({0})".format(",".join("player_%d" % i for i in top_players))
+                elif 'error' in result:
+                    winner = "error"
+                else:
+                    winner = "unknown"
+                fields = ["RESULT", "game_id={0}".format(game_id),
+                          "turns={0}".format(turns), "winner={0}".format(winner)]
+                for i, name in enumerate(player_names):
+                    score = scores[i] if i < len(scores) else "?"
+                    status = statuses[i] if i < len(statuses) else "?"
+                    rank = ranks[i] if i < len(ranks) else "?"
+                    fields.append("player_{0}={1}:rank={2},score={3},status={4}".format(
+                        i, name, rank, score, status))
+                print(" ".join(fields))
+            except Exception:
+                # never let summary printing break a game run
+                traceback.print_exc()
 
         # close file descriptors
         if engine_options['stream_log']:

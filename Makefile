@@ -1,7 +1,7 @@
 # AntsAIBot Testing Makefile
 # Provides easy commands for testing your bot against various opponents
 
-.PHONY: help install install-uv pytest pytest-quick pytest-coverage test test-quick test-full test-against-samples test-against-random test-against-hunter test-against-greedy test-against-lefty test-self test-visualize benchmark clean docker-build docker-test docker-run stats stats-json stats-parallel
+.PHONY: help install install-uv pytest pytest-quick pytest-coverage test test-quick test-full test-against-samples test-against-random test-against-hunter test-against-greedy test-against-lefty test-vs-xathis test-self test-visualize benchmark benchmark-quick benchmark-xathis clean docker-build docker-test docker-run stats stats-json stats-parallel
 
 # Default target
 help:
@@ -28,6 +28,7 @@ help:
 	@echo "  test-against-hunter   Test against HunterBot"
 	@echo "  test-against-greedy   Test against GreedyBot"
 	@echo "  test-against-lefty    Test against LeftyBot"
+	@echo "  test-vs-xathis        Test against XathisBot (ported AI Challenge 2011 winner)"
 	@echo ""
 	@echo "Statistical Analysis:"
 	@echo "  stats            Run statistical analysis (default: 10 games, 1000 turns)"
@@ -253,6 +254,22 @@ test-against-greedy:
 		--map_file maps/maze/maze_02p_01.map \
 		"python3 src/bots/bot.py" \
 		"python3 src/sample_bots/python/GreedyBot.py"
+
+# Test against XathisBot — the "final boss". This is the Python port of
+# Christoph Pacher's AI Challenge 2011 winner ("xathis"), built into this
+# repo as the ground-truth scripted opponent. If your bot can hold its
+# own here, it's competitive at the world-class level.
+test-vs-xathis:
+	@echo "Testing vs XathisBot (ported AI Challenge 2011 winner)..."
+	PYTHONPATH=. python3 src/tools/playgame.py \
+		--player_seed 42 \
+		--end_wait=0.25 \
+		--verbose \
+		--log_dir game_logs \
+		--turns 1000 \
+		--map_file maps/maze/maze_02p_01.map \
+		"python3 src/bots/bot.py" \
+		"python3 src/bots/xathis_bot.py"
 
 # Test against LeftyBot
 test-against-lefty:
@@ -512,10 +529,26 @@ analyze:
 	@echo "Analyzing results..."
 	uv run python scripts/analyze_results.py --file parallel_statistics.json
 
-# Run the full benchmark suite (delegates to scripts/benchmark.sh)
+# Run the full benchmark suite (delegates to scripts/benchmark.py).
+# The legacy bash version (scripts/benchmark.sh) had a broken score-parsing
+# path that reported every game as a draw; the Python rewrite parses the
+# stable RESULT line emitted by playgame.py.
 benchmark:
-	@echo "Running benchmark suite..."
-	@bash scripts/benchmark.sh
+	@echo "Running benchmark suite (5 games / matchup, 1000-turn cap)..."
+	@python3 scripts/benchmark.py
+
+# Fast smoke-benchmark — 2 games per matchup, 200-turn cap (~30s total).
+# Useful in CI / sanity checks.
+benchmark-quick:
+	@echo "Running quick benchmark (2 games / matchup, 200-turn cap)..."
+	@python3 scripts/benchmark.py --quick
+
+# Run the benchmark suite using XathisBot as the bot under test. Useful
+# for measuring xathis_bot's own absolute strength against the sample
+# bots (and as a regression gate when refactoring its phases).
+benchmark-xathis:
+	@echo "Running benchmark with XathisBot as the bot under test..."
+	@python3 scripts/benchmark.py --bot src/bots/xathis_bot.py
 
 # Validate raw against fast output
 validate:

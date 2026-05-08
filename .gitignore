@@ -80,3 +80,11 @@ __pycache__/
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
+
+# Benchmark / game artifacts (per-run output, not source-controlled).
+benchmark_results/
+game_logs/*.replay
+game_logs/*.html
+game_logs/*.input
+game_logs/*.output
+game_logs/*.error
