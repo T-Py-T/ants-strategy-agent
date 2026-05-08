@@ -357,12 +357,12 @@ class Grid():
 
     #outputs the grid in the expected format
     def print_grid(self):
-        print "rows", self.rows
-        print "cols", self.cols
-        print "players", self.no_players
+        print("rows", self.rows)
+        print("cols", self.cols)
+        print("players", self.no_players)
         #self.print_food_spawn_info()
         for row in self.squares:
-            print 'm', ''.join(row)
+            print('m', ''.join(row))
 
     #adds land to a water map using backtracking "recursively"
     def add_land_with_recursive_backtracking(self):
@@ -553,21 +553,21 @@ def main(argv):
     #makes sure the parameters are valid
     if (opts.no_players < min_players and opts.no_players != -1)\
             or opts.no_players > max_players:
-        print "Invalid number of players"
+        print("Invalid number of players")
         return
     if opts.min_hills < 1 or opts.max_hills < opts.min_hills:
-        print "Invalid min/max number of hills per player"
+        print("Invalid min/max number of hills per player")
         return
     if opts.min_dimensions < 1 or opts.max_dimensions < opts.min_dimensions:
-        print "Invalid min/max dimensions parameters"
+        print("Invalid min/max dimensions parameters")
         return
     if opts.min_block_size < 1 or opts.max_block_size < opts.min_block_size:
-        print "Invalid min/max block size parameters"
+        print("Invalid min/max block size parameters")
         return
     if opts.symmetry == "rotational":
         if opts.no_players != -1 and opts.no_players != 2 and\
            opts.no_players != 4 and opts.no_players != 8:
-            print "Invalid number of players for a rotationally symmetric map"
+            print("Invalid number of players for a rotationally symmetric map")
             return
         if opts.rotational_symmetry != -1:
             if (opts.no_players == 2 and (opts.rotational_symmetry < 1 or \
@@ -576,7 +576,7 @@ def main(argv):
                                               opts.rotational_symmetry > 3))  \
                 or (opts.no_players == 8 and opts.rotational_symmetry != 1)   \
                 or (opts.rotational_symmetry < 0 or opts.rotational_symmetry > 5):
-                print "Invalid rotational symmetry type for the number of players"
+                print("Invalid rotational symmetry type for the number of players")
                 return
 
     #creates the map
@@ -591,7 +591,7 @@ def main(argv):
     elif opts.symmetry == "tile":
         grid.symmetry = "tile"
     elif opts.symmetry:
-        print "invalid symmetry type"
+        print("invalid symmetry type")
         return
     else:
         if (opts.no_players == -1 or opts.no_players%2 == 0) \
@@ -607,8 +607,8 @@ def main(argv):
                                          opts.min_starting_distance,
                                          opts.min_block_size, opts.max_block_size,
                                          opts.rotational_symmetry):
-            print "Failed to create a valid rotationally symmetric grid with", \
-                         opts.no_players, "players"
+            print("Failed to create a valid rotationally symmetric grid with",
+                  opts.no_players, "players")
             return
 
     elif grid.symmetry == "tile":
@@ -616,8 +616,8 @@ def main(argv):
                                         opts.min_dimensions, opts.max_dimensions,
                                         opts.min_starting_distance,
                                         opts.min_block_size, opts.max_block_size):
-            print "Failed to create a valid tile symmetric grid with", \
-                         opts.no_players, "players and block size", grid.block_size
+            print("Failed to create a valid tile symmetric grid with",
+                  opts.no_players, "players and block size", grid.block_size)
             return
 
     grid.generate_basis_information()

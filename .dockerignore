@@ -53,10 +53,8 @@ test_report.txt
 *.replay
 *.html
 
-# Documentation
-README.md
+# Documentation (keep README.md — pyproject.toml references it for install)
 TESTING.md
-*.md
 
 # Temporary files
 *.tmp

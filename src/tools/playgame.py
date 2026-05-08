@@ -7,26 +7,32 @@ import time
 from optparse import OptionParser, OptionGroup
 import random
 import cProfile
-import visualizer.visualize_locally
 import json
 try:
     from StringIO import StringIO
 except ImportError:
     from io import StringIO
 
-from src.ants.ants import Ants
+# Bootstrap sys.path so the script works regardless of the caller's cwd
+# (previously required ``PYTHONPATH=.``). The repo root is two levels up
+# from this file (``<repo>/src/tools/playgame.py``).
+_REPO_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+if _REPO_ROOT not in sys.path:
+    sys.path.insert(0, _REPO_ROOT)
+
+import visualizer.visualize_locally  # noqa: E402  (must follow path bootstrap)
+
+from src.ants.ants import Ants  # noqa: E402
 
 sys.path.append("../worker")
 try:
     from src.ants.engine import run_game
 except ImportError:
-    # this can happen if we're launched with cwd outside our own dir
-    # get our full path, then work relative from that
+    # legacy fallback for layouts where this file is invoked outside the repo
     cmd_folder = os.path.dirname(os.path.abspath(__file__))
     if cmd_folder not in sys.path:
         sys.path.insert(0, cmd_folder)
     sys.path.append(cmd_folder + "/../worker")
-    # try again
     from src.ants.engine import run_game
 
 # make stderr red text

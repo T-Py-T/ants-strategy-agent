@@ -48,7 +48,7 @@ The bot is functional but still underperforming against advanced opponents. Here
 ### Performance Metrics
 | Opponent | Result | Key Issue |
 |----------|--------|-----------|
-| RandomBot | TBD | Baseline testing needed |
+| RandomBot | Win (deterministic baseline) | RandomBot dies / hangs out — bot reliably wins |
 | GreedyBot | Loss (16 vs 31 ants) | Food collection strategy needs work |
 | HunterBot | Loss (6 vs 4 ants) | Combat mechanics need refinement |
 | LeftyBot | Loss (11 vs 52 ants) | Exploration strategy needs improvement |
@@ -99,25 +99,50 @@ def calculate_reward(state, action, next_state):
 ## Getting Started
 
 ### Setup
+The project uses [`uv`](https://docs.astral.sh/uv/) as the canonical
+package manager (with `pip` as a fallback). Dependencies are declared in
+`pyproject.toml`; lock state lives in `uv.lock`.
+
 ```bash
 git clone <repository-url>
 cd AntsAIBot
-make install              # Install dependencies
-make test-full           # Run evaluation suite
-make visualize-latest    # View results
+
+# One-step install (uses uv if available, falls back to pip + venv).
+make install
+
+# Or, manually:
+uv sync --all-extras                      # canonical
+# pip install -e ".[dev]"                 # fallback
+
+make test                # Run a quick 30-turn integration game
+make pytest              # Run the unit-test suite (~140 tests)
+make visualize-latest    # Open the latest replay in your browser
 ```
+
+The project ships three optional dependency extras:
+
+| Extra | What it adds | When you need it |
+|-------|--------------|------------------|
+| `[test]` | `pytest`, `pytest-cov` | Running the unit-test suite |
+| `[analysis]` | `pandas`, `numpy`, `matplotlib`, `seaborn`, `scipy` | Running `scripts/analyze_results.py` and statistical analysis Make targets |
+| `[dev]` | Both of the above | Local development |
 
 ### Testing
 ```bash
-# Run comprehensive tests
-make test-probabilistic    # Statistical analysis
-make test-against-samples  # Multi-opponent testing
-make benchmark            # Performance benchmarking
+# Unit tests (fast — uses pytest)
+make pytest                 # Full suite
+make pytest-quick           # Skip subprocess sample-bot tests
+make pytest-coverage        # With coverage report
+
+# Integration testing (real games)
+make test-probabilistic     # Statistical analysis (10 games per opponent)
+make test-against-samples   # Multi-opponent testing
+make benchmark              # Performance benchmarking
 
 # Test against specific opponents
-make test-against-random   # Baseline
-make test-against-greedy   # Food collection
-make test-against-hunter   # Combat
+make test-against-random    # Baseline
+make test-against-greedy    # Food collection
+make test-against-hunter    # Combat
 ```
 
 ### Development
@@ -128,20 +153,37 @@ make docker-test
 
 # VS Code Dev Container
 # Open in VS Code → "Dev Containers: Reopen in Container"
+# (auto-runs `uv sync --all-extras` on first start)
 ```
+
+### Continuous Integration
+Every push and pull request runs the full pytest matrix on Python 3.11 /
+3.12 / 3.13, plus a real-game integration check (`make test`) and a
+Docker image build/run smoke test, via `.github/workflows/ci.yml`.
 
 ## Project Structure
 
 ```
 AntsAIBot/
+├── .devcontainer/       # VS Code Dev Container configuration
+├── .github/workflows/   # GitHub Actions CI (pytest matrix + integration + docker)
 ├── src/
-│   ├── ants/           # Game engine
-│   ├── bots/           # My bot implementation
-│   └── tools/          # Testing and analysis tools
-├── visualizer/         # Game replay visualization
-├── scripts/            # Testing scripts
-├── maps/              # Game maps
-└── game_logs/         # Test results and replays
+│   ├── ants/            # Game engine (Ants, Game, sandbox, run_game)
+│   ├── bots/            # AdvancedBot — my bot implementation
+│   ├── sample_bots/     # Reference opponents (Python / Java / C# / PHP)
+│   └── tools/
+│       ├── playgame.py  # Engine driver / runner
+│       └── mapgen/      # Map-generation utilities
+├── tests/               # pytest suite (unit + structural backstops)
+├── visualizer/          # Game replay visualization
+├── scripts/             # Statistical-analysis + benchmarking scripts
+├── maps/                # Game maps (example, maze, multi_hill_maze, random_walk)
+├── submission_test/     # Submission packaging sandbox
+├── game_logs/           # Test outputs and game replays
+├── pyproject.toml       # Project metadata, deps, extras, pytest config
+├── uv.lock              # Pinned dependency resolution
+├── Dockerfile           # Slim runtime image (Python 3.13 + JDK 21)
+└── Makefile             # Friendly entry points for every workflow
 ```
 
 ---

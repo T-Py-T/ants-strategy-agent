@@ -220,10 +220,20 @@ class AntsAIAnalyzer:
         }
         
         if not self.game_data.empty:
+            # ``groupby(...).value_counts()`` returns a Series with a MultiIndex
+            # of (turns, result) which is not JSON-serializable as keys; flatten
+            # it into a nested {turns: {result: count}} dict instead.
+            performance_series = (
+                self.game_data.groupby('turns')['result'].value_counts()
+            )
+            performance_by_turns: Dict[int, Dict[str, int]] = {}
+            for (turns, result), count in performance_series.items():
+                performance_by_turns.setdefault(int(turns), {})[str(result)] = int(count)
+
             report['game_level_analysis'] = {
                 'win_rates': self.game_data.groupby('test_name')['result'].apply(lambda x: (x == 'WIN').mean() * 100).to_dict(),
                 'score_correlations': self.game_data[['our_score', 'enemy_score', 'turns']].corr().to_dict(),
-                'performance_by_turns': self.game_data.groupby('turns')['result'].value_counts().to_dict()
+                'performance_by_turns': performance_by_turns,
             }
         
         with open(output_file, 'w') as f:

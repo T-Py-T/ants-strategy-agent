@@ -1,20 +1,26 @@
 # AntsAIBot Testing Makefile
 # Provides easy commands for testing your bot against various opponents
 
-.PHONY: help install test test-quick test-full test-against-samples test-against-random test-against-hunter test-against-greedy test-against-lefty test-self test-visualize clean docker-build docker-test docker-run stats stats-json stats-parallel
+.PHONY: help install install-uv pytest pytest-quick pytest-coverage test test-quick test-full test-against-samples test-against-random test-against-hunter test-against-greedy test-against-lefty test-self test-visualize benchmark clean docker-build docker-test docker-run stats stats-json stats-parallel
 
 # Default target
 help:
 	@echo "AntsAIBot Testing Commands:"
 	@echo ""
 	@echo "Setup:"
-	@echo "  install          Install Python dependencies"
+	@echo "  install          Install all Python dependencies (prefers uv, falls back to pip)"
+	@echo "  install-uv       Install uv itself if not already on PATH"
 	@echo "  docker-build     Build Docker image for testing"
 	@echo ""
-	@echo "Testing:"
-	@echo "  test             Run quick test (30 turns, 2 players)"
-	@echo "  test-quick       Run quick test with your bot vs random"
-	@echo "  test-full        Run full test (1000 turns, 4 players)"
+	@echo "Unit tests:"
+	@echo "  pytest           Run the full unit-test suite (recommended pre-commit gate)"
+	@echo "  pytest-quick     Run only fast unit tests (skip subprocess-bot tests)"
+	@echo "  pytest-coverage  Run pytest with coverage report"
+	@echo ""
+	@echo "Integration testing:"
+	@echo "  test             Run quick game (30 turns, 2 players)"
+	@echo "  test-quick       Run quick game with your bot vs random"
+	@echo "  test-full        Run full game (1000 turns, 4 players)"
 	@echo "  test-self        Test your bot against itself (4 players)"
 	@echo "  test-against-samples  Test against all sample bots"
 	@echo "  test-probabilistic   Run 10 games per opponent, calculate win rates"
@@ -46,10 +52,51 @@ help:
 	@echo "Cleanup:"
 	@echo "  clean            Clean game logs and temporary files"
 
-# Install dependencies
+# Install dependencies. Prefers `uv sync --all-extras` (the canonical
+# workflow — installs the project + all extras into ./.venv from
+# pyproject.toml + uv.lock). Falls back to `pip install -e .[dev]` if uv
+# isn't on PATH. Avoids `--break-system-packages` so we don't trample on
+# system Python (PEP 668).
 install:
-	@echo "Checking if dependencies are available..."
-	@python3 -c "import colorama, pytest" 2>/dev/null && echo "Dependencies already available" || (echo "Installing dependencies..." && pip3 install --break-system-packages colorama pytest)
+	@if command -v uv >/dev/null 2>&1; then \
+		echo "Installing via uv (./.venv)..."; \
+		uv sync --all-extras; \
+	else \
+		echo "uv not found; falling back to pip install -e .[dev]"; \
+		echo "Tip: 'make install-uv' will install uv for you."; \
+		python3 -m pip install --upgrade pip; \
+		python3 -m pip install -e ".[dev]"; \
+	fi
+
+# Install uv itself (works on macOS/Linux). On Windows use the documented
+# PowerShell installer instead.
+install-uv:
+	@if command -v uv >/dev/null 2>&1; then \
+		echo "uv already installed: $$(uv --version)"; \
+	else \
+		echo "Installing uv..."; \
+		curl -LsSf https://astral.sh/uv/install.sh | sh; \
+	fi
+
+# Resolve which Python to use when invoking pytest. Prefer the uv-managed
+# venv at ./.venv if it exists; otherwise fall back to whatever
+# python3/pytest is on PATH.
+PYTEST_BIN := $(shell test -x .venv/bin/pytest && echo .venv/bin/pytest || echo "python3 -m pytest")
+
+# Run the full pytest suite (unit tests under tests/).
+pytest:
+	@echo "Running pytest suite..."
+	@$(PYTEST_BIN)
+
+# Run only the fast tests; skip subprocess-spawning sample-bot tests.
+pytest-quick:
+	@echo "Running fast unit tests..."
+	@$(PYTEST_BIN) --ignore=tests/test_sample_bots.py
+
+# Run pytest with coverage reporting. Requires the [test] extra (pytest-cov).
+pytest-coverage:
+	@echo "Running pytest with coverage..."
+	@$(PYTEST_BIN) --cov=src --cov=scripts --cov-report=term-missing
 
 # Build Docker image
 docker-build:
@@ -464,6 +511,11 @@ analyze:
 	@$(MAKE) stats-json GAMES=20
 	@echo "Analyzing results..."
 	uv run python scripts/analyze_results.py --file parallel_statistics.json
+
+# Run the full benchmark suite (delegates to scripts/benchmark.sh)
+benchmark:
+	@echo "Running benchmark suite..."
+	@bash scripts/benchmark.sh
 
 # Validate raw against fast output
 validate:

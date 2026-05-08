@@ -3,7 +3,10 @@ import sys
 from random import randint, choice, seed
 from collections import deque
 from itertools import product
-from sys import maxint
+try:
+    from sys import maxint
+except ImportError:  # Python 3
+    from sys import maxsize as maxint
 
 MY_ANT = 0
 ANTS = 0
