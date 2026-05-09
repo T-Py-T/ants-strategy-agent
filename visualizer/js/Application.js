@@ -1203,7 +1203,7 @@ Visualizer.prototype.draw = function() {
 	this.shiftedMap.validate();
 	this.main.ctx.drawImage(this.shiftedMap.canvas, loc.x, loc.y);
 
-	// mouse cursor (super complicated position calculation)
+	// mouse pointer (super complicated position calculation)
 	ctx = this.main.ctx;
 	if (this.state.mouseOverVis) {
 		ctx.save();

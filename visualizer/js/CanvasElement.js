@@ -561,24 +561,24 @@ CanvasElementAntsMap.prototype.checkState = function() {
 		}
 	}
 
-	// find ants in range of mouse cursor
+	// find ants in range of mouse pointer
 	if (this.mouseOverVis !== this.state.mouseOverVis
 			|| this.mouseOverVis
 			&& (timeChanged || this.mouseCol !== this.state.mouseCol || this.mouseRow !== this.state.mouseRow)) {
 		this.mouseOverVis = this.state.mouseOverVis;
 		this.mouseCol = this.state.mouseCol;
 		this.mouseRow = this.state.mouseRow;
-		if (this.collectAntsAroundCursor()) this.invalid = true;
+		if (this.collectAntsAroundPointer()) this.invalid = true;
 	}
 };
 
 /**
  * Builds the internal list of ants and food that need a circle drawn around them because the mouse
- * cursor is within their radius of effect (either attack or spawn).
+ * pointer is within their radius of effect (either attack or spawn).
  * 
  * @returns {Boolean} true, if the internal list has changed since the last call of this method
  */
-CanvasElementAntsMap.prototype.collectAntsAroundCursor = function() {
+CanvasElementAntsMap.prototype.collectAntsAroundPointer = function() {
 	var col, row, ar, sr, colPixels, rowPixels, drawList, i, k, ant, d, owned;
 	var found;
 	var circledAnts = [];

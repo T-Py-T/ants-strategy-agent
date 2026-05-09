@@ -160,13 +160,13 @@ ButtonGroup.prototype.draw = function() {
 };
 
 /**
- * Finds an active button under the mouse cursor.
+ * Finds an active button under the mouse pointer.
  * 
  * @param {Number}
  *        mx the mouse x position
  * @param {Number}
  *        my the mouse y position
- * @returns {Button} the active button under the mouse cursor or null
+ * @returns {Button} the active button under the mouse pointer or null
  */
 ButtonGroup.prototype.mouseMove = function(mx, my) {
 	var i;
@@ -549,14 +549,14 @@ ButtonManager.prototype.getGroup = function(name) {
 };
 
 /**
- * Finds an active button under the mouse cursor. The call is forwarded to matching button groups.
+ * Finds an active button under the mouse pointer. The call is forwarded to matching button groups.
  * 
  * @see ButtonGroup#mouseMove
  * @param {Number}
  *        mx the mouse x position
  * @param {Number}
  *        my the mouse y position
- * @returns {Button} the active button under the mouse cursor or null
+ * @returns {Button} the active button under the mouse pointer or null
  */
 ButtonManager.prototype.mouseMove = function(mx, my) {
 	var result = null;

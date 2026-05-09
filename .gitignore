@@ -2,9 +2,8 @@
 **/todo/*
 tasks/*
 
-#IDE Ignore section
+# IDE / local tooling (keep machine-specific junk out of commits)
 .vscode/
-.cursor/
 **/tasks/*
 .idea/
 .vimrc/
