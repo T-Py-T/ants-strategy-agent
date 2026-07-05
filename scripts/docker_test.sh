@@ -16,14 +16,18 @@ IMAGE_NAME="antsaibot"
 CONTAINER_NAME="antsaibot-test"
 LOG_DIR="game_logs"
 
+# Resolve which container engine to use. Prefer podman when present,
+# otherwise docker. Override by exporting CONTAINER_ENGINE=docker.
+ENGINE="${CONTAINER_ENGINE:-$(command -v podman >/dev/null 2>&1 && echo podman || echo docker)}"
+
 echo -e "${BLUE}AntsAIBot Docker Testing${NC}"
 echo "========================="
 echo ""
 
 # Function to check if Docker is running
 check_docker() {
-    if ! docker info >/dev/null 2>&1; then
-        echo -e "${RED}Error: Docker is not running or not accessible${NC}"
+    if ! "$ENGINE" info >/dev/null 2>&1; then
+        echo -e "${RED}Error: $ENGINE is not running or not accessible${NC}"
         exit 1
     fi
 }
@@ -31,7 +35,7 @@ check_docker() {
 # Function to build Docker image
 build_image() {
     echo -e "${YELLOW}Building Docker image...${NC}"
-    docker build -t "$IMAGE_NAME" .
+    "$ENGINE" build -t "$IMAGE_NAME" .
     echo -e "${GREEN}✓ Image built successfully${NC}"
 }
 
@@ -43,7 +47,7 @@ run_docker_test() {
     echo -e "${YELLOW}Running: $test_name${NC}"
     
     # Create container and run test
-    docker run --rm \
+    "$ENGINE" run --rm \
         -v "$(pwd)/$LOG_DIR:/app/$LOG_DIR" \
         -v "$(pwd)/benchmark_results:/app/benchmark_results" \
         --name "$CONTAINER_NAME" \
@@ -60,7 +64,7 @@ run_interactive() {
     echo "Type 'exit' to leave the container."
     echo ""
     
-    docker run -it --rm \
+    "$ENGINE" run -it --rm \
         -v "$(pwd):/app" \
         -w /app \
         --name "$CONTAINER_NAME" \
@@ -71,7 +75,7 @@ run_interactive() {
 # Function to clean up
 cleanup() {
     echo -e "${YELLOW}Cleaning up...${NC}"
-    docker container rm -f "$CONTAINER_NAME" 2>/dev/null || true
+    "$ENGINE" container rm -f "$CONTAINER_NAME" 2>/dev/null || true
 }
 
 # Main script logic

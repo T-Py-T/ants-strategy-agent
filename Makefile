@@ -99,17 +99,21 @@ pytest-coverage:
 	@echo "Running pytest with coverage..."
 	@$(PYTEST_BIN) --cov=src --cov=scripts --cov-report=term-missing
 
-# Build Docker image
+# Resolve which container engine to use. Prefer podman when present,
+# otherwise docker. Override with `make docker-test CONTAINER_ENGINE=docker`.
+CONTAINER_ENGINE ?= $(shell command -v podman >/dev/null 2>&1 && echo podman || echo docker)
+
+# Build container image
 docker-build:
-	docker build -t antsaibot .
+	$(CONTAINER_ENGINE) build -t antsaibot .
 
-# Run tests in Docker
+# Run tests in a container
 docker-test:
-	docker run --rm -v $(PWD)/game_logs:/app/game_logs antsaibot make test
+	$(CONTAINER_ENGINE) run --rm -v $(PWD)/game_logs:/app/game_logs antsaibot make test
 
-# Run interactive Docker container
+# Run interactive container
 docker-run:
-	docker run -it --rm -v $(PWD):/app -w /app antsaibot /bin/bash
+	$(CONTAINER_ENGINE) run -it --rm -v $(PWD):/app -w /app antsaibot /bin/bash
 
 # Quick test (30 turns, 2 players)
 test:
