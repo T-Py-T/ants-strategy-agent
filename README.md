@@ -193,8 +193,8 @@ make docker-test
 ```
 
 ### Continuous Integration
-Every push and pull request runs the full pytest matrix on Python 3.11 /
-3.12 / 3.13, plus a real-game integration check (`make test`) and a
+Every push and pull request runs the full pytest matrix on Python 3.12 /
+3.13, plus a real-game integration check (`make test`) and a
 Docker image build/run smoke test, via `.github/workflows/ci.yml`.
 
 ## Project Structure
