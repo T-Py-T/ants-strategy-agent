@@ -3,6 +3,7 @@ import sys
 from random import randint, choice, seed
 from collections import deque
 from itertools import product
+
 try:
     from sys import maxint
 except ImportError:  # Python 3
@@ -15,48 +16,48 @@ LAND = -2
 FOOD = -3
 WATER = -4
 UNSEEN = -5
-MAP_RENDER = '0123456789?%*.!'
+MAP_RENDER = "0123456789?%*.!"
 
-AIM = {'n': (-1, 0),
-       'e': (0, 1),
-       's': (1, 0),
-       'w': (0, -1)}
+AIM = {"n": (-1, 0), "e": (0, 1), "s": (1, 0), "w": (0, -1)}
+
 
 class Map(object):
     def __init__(self, options={}):
         super(Map, self).__init__()
         self.name = "blank"
         self.map = [[]]
-        self.random_seed = options.get('seed', None)
+        self.random_seed = options.get("seed", None)
         if self.random_seed == None:
-            self.random_seed = randint(-maxint-1, maxint)
+            self.random_seed = randint(-maxint - 1, maxint)
         seed(self.random_seed)
 
     def generate(self):
-        raise Exception("Not Implemented")
+        raise NotImplementedError
 
     def get_random_option(self, option):
-        if type(option) == tuple:
+        if isinstance(option, tuple):
             if len(option) == 2:
                 return randint(*option)
             elif len(option) == 1:
                 return option[0]
             elif len(option) == 0:
-                raise Exception("Invalid option: 0 length tuple")
+                raise ValueError("Invalid option: 0 length tuple")
             else:
                 return choice(option)
-        elif type(option) in (list, set):
+        elif isinstance(option, (list, set)):
             if len(option) > 0:
                 return choice(option)
             else:
-                raise Exception("Invalid option: 0 length list")
-        elif type(option) in (int, float, str):
+                raise ValueError("Invalid option: 0 length list")
+        elif isinstance(option, (int, float, str)):
             return option
         else:
-            raise Exception("Invalid option: type {0} not supported".format(type(option)))
+            raise TypeError(
+                "Invalid option: type {0} not supported".format(type(option))
+            )
 
     def toPNG(self, fd=sys.stdout):
-        raise Exception("Not Implemented")
+        raise NotImplementedError
 
     def toText(self, fd=sys.stdout):
         players = set()
@@ -64,14 +65,17 @@ class Map(object):
             for c in row:
                 if c >= ANTS:
                     players.add(c)
-        fd.write("# map_type {0}\n# random_seed {1}\nplayers {2}\nrows {3}\ncols {4}\n"
-                 .format(self.name,
-                         self.random_seed,
-                         len(players),
-                         len(self.map),
-                         len(self.map[0])))
+        fd.write(
+            "# map_type {0}\n# random_seed {1}\nplayers {2}\nrows {3}\ncols {4}\n".format(
+                self.name,
+                self.random_seed,
+                len(players),
+                len(self.map),
+                len(self.map[0]),
+            )
+        )
         for row in self.map:
-            fd.write("m {0}\n".format(''.join([MAP_RENDER[c] for c in row])))
+            fd.write("m {0}\n".format("".join([MAP_RENDER[c] for c in row])))
 
     def manhatten_distance(self, loc1, loc2, size):
         rows, cols = size
@@ -110,8 +114,8 @@ class Map(object):
 
         def is_block_free(loc):
             row, col = loc
-            for d_row in range(-block_size, block_size+1):
-                for d_col in range(-block_size, block_size+1):
+            for d_row in range(-block_size, block_size + 1):
+                for d_col in range(-block_size, block_size + 1):
                     h_row = (row + d_row) % rows
                     h_col = (col + d_col) % cols
                     if self.map[h_row][h_col] == WATER:
@@ -120,8 +124,8 @@ class Map(object):
 
         def mark_block(loc, m, ilk):
             row, col = loc
-            for d_row in range(-block_size, block_size+1):
-                for d_col in range(-block_size, block_size+1):
+            for d_row in range(-block_size, block_size + 1):
+                for d_col in range(-block_size, block_size + 1):
                     h_row = (row + d_row) % rows
                     h_col = (col + d_col) % cols
                     m[h_row][h_col] = ilk
@@ -130,8 +134,7 @@ class Map(object):
             for row, col in product(range(rows), range(cols)):
                 if is_block_free((row, col)) and not visited[row][col]:
                     return (row, col)
-            else:
-                return None
+            return None
 
         # list of contiguous areas
         areas = []
@@ -146,7 +149,6 @@ class Map(object):
             squares = deque()
             row, col = find_open_spot()
 
-            #seen_area = open_block((row, col))
             squares.appendleft((row, col))
 
             while len(squares) > 0:
@@ -154,7 +156,7 @@ class Map(object):
                 visited[row][col] = True
                 area_visited[row][col] = True
                 area_seen[row][col] = True
-                for d_row, d_col in ((1,0), (0,1), (-1,0), (0,-1)):
+                for d_row, d_col in ((1, 0), (0, 1), (-1, 0), (0, -1)):
                     s_row = (row + d_row) % rows
                     s_col = (col + d_col) % cols
                     if not visited[s_row][s_col] and is_block_free((s_row, s_col)):
@@ -163,7 +165,6 @@ class Map(object):
                         squares.appendleft((s_row, s_col))
 
             # check percentage filled
-            #areas.append(1.0 * seen_area / land_area)
             visited_list = []
             seen_list = []
             for row in range(rows):
@@ -180,24 +181,21 @@ class Map(object):
 
     def fill_small_areas(self):
         # keep largest contiguous area as land, fill the rest with water
-        count = 0
         areas = self.section(0)
         for area in areas[1:]:
             for row, col in area[0]:
                 self.map[row][col] = WATER
-                count += 1
-        #print("fill {0}".format(count))
 
     def make_wider(self):
         # make sure the map has more columns than rows
         rows = len(self.map)
         cols = len(self.map[0])
         if rows > cols:
-            map = [[LAND] * rows for _ in range(cols)]
+            wider_map = [[LAND] * rows for _ in range(cols)]
             for row in range(rows):
                 for col in range(cols):
-                    map[col][row] = self.map[row][col]
-            self.map = map
+                    wider_map[col][row] = self.map[row][col]
+            self.map = wider_map
 
     def tile(self, grid):
         rows = len(self.map)
@@ -207,23 +205,21 @@ class Map(object):
         # select random mirroring
         row_mirror = 0
         if row_sym % 2 == 0:
-            #if row_sym % 4 == 0:
-            #    row_mirror = choice((0,4))
-            row_mirror = choice((row_mirror, 2))
+            # Preserve the historical RNG draw even though mirroring is fixed.
+            choice((row_mirror, 2))
             row_mirror = 2
 
         col_mirror = 0
         if col_sym % 2 == 0:
-            #if col_sym % 4 == 0:
-            #    col_mirror = choice((0,4))
-            col_mirror = choice((col_mirror, 2))
+            # Preserve the historical RNG draw even though mirroring is fixed.
+            choice((col_mirror, 2))
             col_mirror = 2
 
         # perform tiling
         t_rows = rows * row_sym
         t_cols = cols * col_sym
         ant = 0
-        map = [[LAND]*t_cols for _ in range(t_rows)]
+        tiled_map = [[LAND] * t_cols for _ in range(t_rows)]
         for t_row in range(t_rows):
             for t_col in range(t_cols):
                 # detect grid location
@@ -237,26 +233,23 @@ class Map(object):
                     col = cols - 1 - (t_col % cols)
                 else:
                     col = t_col % cols
-                try:
-                    map[t_row][t_col] = self.map[row][col]
-                except:
-                    print("issue")
+                tiled_map[t_row][t_col] = self.map[row][col]
                 if self.map[row][col] == ANTS:
-                    map[t_row][t_col] = ant
+                    tiled_map[t_row][t_col] = ant
                     ant += 1
-        self.map = map
+        self.map = tiled_map
 
     def translate(self, offset):
         d_row, d_col = offset
         rows = len(self.map)
         cols = len(self.map[0])
-        map = [[LAND] * cols for _ in range(rows)]
+        translated_map = [[LAND] * cols for _ in range(rows)]
         for row in range(rows):
             for col in range(cols):
                 o_row = (d_row + row) % rows
                 o_col = (d_col + col) % cols
-                map[o_row][o_col] = self.map[row][col]
-        self.map = map
+                translated_map[o_row][o_col] = self.map[row][col]
+        self.map = translated_map
 
     def allowable(self):
         # all squares must be accessible from all other squares

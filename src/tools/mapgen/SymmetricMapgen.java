@@ -1,5 +1,6 @@
+import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.Random;
-import java.util.Stack;
 
 
 public class SymmetricMapgen {
@@ -12,24 +13,24 @@ public class SymmetricMapgen {
 
     private Random rnd = new Random();
 
-    private final static char[] PRINT_OUTS = {'%', '.', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'};
-    private final static int WATER = 0;
-    private final static int LAND = 1;
-    private final static int A_ANT = 2;
+    private static final char[] PRINT_OUTS = {'%', '.', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'};
+    private static final int WATER = 0;
+    private static final int LAND = 1;
+    private static final int A_ANT = 2;
 
-    private final static int[][] DIRECTIONS = {{-1, 0}, {1, 0}, {0, 1}, {0, -1}};
+    private static final int[][] DIRECTIONS = {{-1, 0}, {1, 0}, {0, 1}, {0, -1}};
 
     //Game parameters
-    private final static int MIN_PLAYERS = 4;
-    private final static int MAX_PLAYERS = 10;
+    private static final int MIN_PLAYERS = 4;
+    private static final int MAX_PLAYERS = 10;
 
-    private final static int MIN_DIM = 70;
-    private final static int MAX_DIM = 120;
-    private final static int MIN_START_DISTANCE = 30;
+    private static final int MIN_DIM = 70;
+    private static final int MAX_DIM = 120;
+    private static final int MIN_START_DISTANCE = 30;
 
-    private final static double MIN_LAND_PROPORTION = 0.5;
-    private final static double MAX_LAND_PROPORTION = 0.8;
-    private final static int NO_EXTRA_WALKS = 30;
+    private static final double MIN_LAND_PROPORTION = 0.5;
+    private static final double MAX_LAND_PROPORTION = 0.8;
+    private static final int NO_EXTRA_WALKS = 30;
 
     //Map parameters
     private int noPlayers = 0;
@@ -37,11 +38,9 @@ public class SymmetricMapgen {
     private int cols = 0;
     private int rowT = 0;
     private int colT = 0;
-    private int waterSquares = 0;
     private int landSquares = 0;
 
     private int[][] mapData;
-    private int[] timesVisited;
     private int[] aLoc;
     private int[][] cLocs;
 
@@ -122,7 +121,7 @@ public class SymmetricMapgen {
         int dr = Math.min(d1, rows - d1);
         int dc = Math.min(d2, cols - d2);
 
-        return Math.sqrt(dr * dr + dc * dc);
+        return Math.sqrt((double) dr * dr + (double) dc * dc);
     }
 
     //Adds ants to the map
@@ -149,8 +148,8 @@ public class SymmetricMapgen {
 
     //Adds land to a map of water
     private void addWalkLand() {
-        int min = (int)(MIN_LAND_PROPORTION * (double)rows * (double)cols);
-        int max = (int)(MAX_LAND_PROPORTION * (double)rows * (double)cols);
+        int min = (int)(MIN_LAND_PROPORTION * rows * cols);
+        int max = (int)(MAX_LAND_PROPORTION * rows * cols);
 
         int noLandSquares = rnd.nextInt(max - min) + min;
 
@@ -174,10 +173,10 @@ public class SymmetricMapgen {
         visited[startLoc[0]][startLoc[1]] = 1;
         int squaresVisited = 1;
 
-        Stack<int[]> stack = new Stack<int[]>();
-        stack.add(startLoc);
+        Deque<int[]> stack = new ArrayDeque<>();
+        stack.push(startLoc);
 
-        while (!stack.empty()) {
+        while (!stack.isEmpty()) {
             int[] tmpLoc = stack.pop();
 
             for (int i = 0; i < DIRECTIONS.length; i++) {
@@ -185,17 +184,13 @@ public class SymmetricMapgen {
 
                 if (visited[newLoc[0]][newLoc[1]] == 0) {
                     visited[newLoc[0]][newLoc[1]] = 1;
-                    stack.add(newLoc);
+                    stack.push(newLoc);
                     squaresVisited++;
                 }
             }
         }
 
-        if (squaresVisited == landSquares) {
-            return true;
-        }
-
-        return false;
+        return squaresVisited == landSquares;
     }
 
     //Walks the random walk locations

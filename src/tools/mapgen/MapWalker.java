@@ -1,5 +1,6 @@
+import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.Random;
-import java.util.Stack;
 
 /**
  * Uses "walkers" that randomly moves around a water filled map and adds lands
@@ -9,10 +10,10 @@ public class MapWalker {
     private static Random rnd = new Random();
 
     //Land proportions
-    private final static double MIN_LAND_PROPORTION = 0.5;
-    private final static double MAX_LAND_PROPORTION = 0.8;
+    private static final double MIN_LAND_PROPORTION = 0.5;
+    private static final double MAX_LAND_PROPORTION = 0.8;
 
-    private final static int[][] DIRECTIONS = {{-1, 0}, {1, 0}, {0, 1}, {0, -1}};
+    private static final int[][] DIRECTIONS = {{-1, 0}, {1, 0}, {0, 1}, {0, -1}};
 
     //Amount of walkers to use
     private int nbrOfWalkers;
@@ -65,8 +66,8 @@ public class MapWalker {
      */
     private void addLand() {
         int waterSquares = countWaterSquares();
-        int min = (int)(MIN_LAND_PROPORTION * (double)waterSquares);
-        int max = (int)(MAX_LAND_PROPORTION * (double)waterSquares);
+        int min = (int)(MIN_LAND_PROPORTION * waterSquares);
+        int max = (int)(MAX_LAND_PROPORTION * waterSquares);
 
         int nbrOfLandSquares = rnd.nextInt(max - min) + min;
 
@@ -132,10 +133,10 @@ public class MapWalker {
         visited[tMapWalkers[0][0]][tMapWalkers[0][1]] = 1;
         int squaresVisited = 1;
 
-        Stack<int[]> stack = new Stack<int[]>();
-        stack.add(new int[] {tMapWalkers[0][0], tMapWalkers[0][1]});
+        Deque<int[]> stack = new ArrayDeque<>();
+        stack.push(new int[] {tMapWalkers[0][0], tMapWalkers[0][1]});
 
-        while (!stack.empty()) {
+        while (!stack.isEmpty()) {
             int[] tmpLoc = stack.pop();
 
             for (int i = 0; i < DIRECTIONS.length; i++) {
@@ -143,16 +144,12 @@ public class MapWalker {
 
                 if (visited[newLoc[0]][newLoc[1]] == 0 && tMap[newLoc[0]][newLoc[1]] == 1) {
                     visited[newLoc[0]][newLoc[1]] = 1;
-                    stack.add(newLoc);
+                    stack.push(newLoc);
                     squaresVisited++;
                 }
             }
         }
 
-        if (squaresVisited == tLandSquares) {
-            return true;
-        }
-
-        return false;
+        return squaresVisited == tLandSquares;
     }
 }

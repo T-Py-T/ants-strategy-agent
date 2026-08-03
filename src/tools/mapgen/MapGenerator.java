@@ -7,21 +7,21 @@ public class MapGenerator {
 
     /** Constants */
     //Values used on the map
-    public final static int WATER_TILE = 0;
-    public final static int LAND_TILE = 1;
-    public final static int INVALID_TILE = -1;
-    private final static int ANT_START_POS_TILE = 2;
+    public static final int WATER_TILE = 0;
+    public static final int LAND_TILE = 1;
+    public static final int INVALID_TILE = -1;
+    private static final int ANT_START_POS_TILE = 2;
 
     //Map size
-    private final static int MAX_MAP_SIZE = 120;
-    private final static int MIN_MAP_SIZE = 80;
+    private static final int MAX_MAP_SIZE = 120;
+    private static final int MIN_MAP_SIZE = 80;
 
     //For printout
-    private final static String ROW_PREFIX = "m ";
-    private final static String TILE_PREFIX = "";
+    private static final String ROW_PREFIX = "m ";
+    private static final String TILE_PREFIX = "";
 
     //Minimum start distance from the end of the map part. Distance between ants will be double this
-    private int MIN_START_DIST = 3;
+    private int minStartDistance = 3;
 
     /** Map settings */
     //Only 2, 4 or 8 players are currently valid
@@ -52,10 +52,7 @@ public class MapGenerator {
 
         mapPart[startPos[0]][startPos[1]] = ANT_START_POS_TILE;
 
-        //Build a full map from the map part
-        int[][] fullMap = buildFullMap(mapPart);
-
-        return fullMap;
+        return buildFullMap(mapPart);
     }
 
     /**
@@ -79,7 +76,7 @@ public class MapGenerator {
         		{ 'a', 'b', 'a', 'b', 'b', 'a', 'b', 'a' },
         		{ 'a', 'b', 'b', 'a', 'a', 'b', 'b', 'a' }
         };
-        int player_count = 0;
+        int playerCount = 0;
         int sym = rnd.nextInt(9);
         char[] ants = antss[sym];
         switch (sym) {
@@ -87,41 +84,45 @@ public class MapGenerator {
         case 0:
         case 1:
         case 2:
-        	player_count = 8;
-        	break;
+            playerCount = 8;
+            break;
         // 4 players
         case 3:
         case 4:
         case 5:
-        	player_count = 4;
-        	break;
+            playerCount = 4;
+            break;
         // 2 players
         case 6:
         case 7:
         case 8:
-        	player_count = 2;
-        	break;        	
+            playerCount = 2;
+            break;
+        default:
+            throw new IllegalStateException("Unsupported symmetry: " + sym);
         }
         StringBuilder sb = new StringBuilder();
-        sb.append("players " + Integer.toString(player_count) + "\n");
-        sb.append("rows " + Integer.toString(map.length) + "\n");
-        sb.append("cols " + Integer.toString(map.length) + "\n");
+        sb.append("players ").append(playerCount).append('\n');
+        sb.append("rows ").append(map.length).append('\n');
+        sb.append("cols ").append(map.length).append('\n');
         for (int r = 0; r < map.length; r++) {
             sb.append(ROW_PREFIX);
             for (int c = 0; c < map[0].length; c++) {
                 switch (map[r][c]) {
                     case WATER_TILE:
-                        sb.append(TILE_PREFIX + "%");
+                        sb.append(TILE_PREFIX).append('%');
                         break;
                     case LAND_TILE:
-                        sb.append(TILE_PREFIX + ".");
+                        sb.append(TILE_PREFIX).append('.');
                         break;
                     case ANT_START_POS_TILE:
-                        sb.append(TILE_PREFIX + ants[ant++]);
+                        sb.append(TILE_PREFIX).append(ants[ant++]);
                         break;
                     case INVALID_TILE:
-                        sb.append(TILE_PREFIX + " ");
+                        sb.append(TILE_PREFIX).append(' ');
                         break;
+                    default:
+                        throw new IllegalArgumentException("Unsupported tile: " + map[r][c]);
                 }
             }
             sb.append("\n");
@@ -187,18 +188,18 @@ public class MapGenerator {
         int startCol = 0;
 
         while (true) {
-            startRow = rnd.nextInt(map.length - MIN_START_DIST * 2) + MIN_START_DIST;
-            startCol = rnd.nextInt(map.length - MIN_START_DIST * 2) + MIN_START_DIST;
+            startRow = rnd.nextInt(map.length - minStartDistance * 2) + minStartDistance;
+            startCol = rnd.nextInt(map.length - minStartDistance * 2) + minStartDistance;
 
             //Make sure we don't start in a place that will be removed
             if ((diagMode && nbrOfPlayers == 2) || nbrOfPlayers == 8) {
-                if (startCol > startRow + MIN_START_DIST) {
+                if (startCol > startRow + minStartDistance) {
                     break;
                 }
             }
             else if (diagMode && nbrOfPlayers == 4) {
-                if (startCol > startRow + MIN_START_DIST &&
-                        (map[0].length - startCol) > startRow + MIN_START_DIST) {
+                if (startCol > startRow + minStartDistance &&
+                        (map[0].length - startCol) > startRow + minStartDistance) {
                     break;
                 }
             }
@@ -218,7 +219,7 @@ public class MapGenerator {
 
         if (nbrOfPlayers == 2) {
             if (diagMode) {
-                fullMap = overlayMaps(fullMap, mirrorDiagonal(mapPart));
+                fullMap = overlayMaps(mapPart, mirrorDiagonal(mapPart));
             }
             else {
                 fullMap = new int[mapPart.length * 2][mapPart[0].length];
@@ -229,7 +230,7 @@ public class MapGenerator {
         else if (nbrOfPlayers == 4) {
             if (diagMode) {
                 mapPart = mirrorDiagonal(mapPart);
-                fullMap = overlayMaps(fullMap, mapPart);
+                fullMap = overlayMaps(mapPart, mirrorDiagonal(mapPart));
                 fullMap = overlayMaps(fullMap, mirrorDiagonal2(fullMap));
             }
             else {
@@ -248,6 +249,9 @@ public class MapGenerator {
             addMapPart(fullMap, mirrorTopBottom(mapPart), mapPart.length, 0);
             addMapPart(fullMap, mirrorLeftRight(mapPart), 0, mapPart[0].length);
             addMapPart(fullMap, mirrorBoth(mapPart), mapPart.length, mapPart[0].length);
+        }
+        else {
+            throw new IllegalStateException("Only 2, 4, or 8 players are supported");
         }
 
         if (border) {
@@ -278,9 +282,7 @@ public class MapGenerator {
         int[][] res = new int[map.length][map[0].length];
 
         for (int r = 0; r < map.length; r++) {
-            for (int c = 0; c < map[0].length; c++) {
-                res[r][c] = map[map.length - r - 1][c];
-            }
+            System.arraycopy(map[map.length - r - 1], 0, res[r], 0, map[0].length);
         }
 
         return res;

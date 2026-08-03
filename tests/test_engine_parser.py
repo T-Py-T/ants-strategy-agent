@@ -106,6 +106,11 @@ class TestParseMapErrors:
         with pytest.raises(Exception, match="players count expected"):
             _parse(bad)
 
+    def test_hive_count_mismatch_reports_hive_length(self) -> None:
+        bad = "rows 1\ncols 3\nplayers 2\nhive 0\nm 0.1\n"
+        with pytest.raises(ValueError, match="Expected 2, got 1"):
+            _parse(bad)
+
 
 class TestParseMapBundledMaps:
     """Smoke-test the parser against actual maps shipped with the repo."""

@@ -111,7 +111,7 @@ class TestEvalBattle:
         bot = _build(xb, my_at=[(10, 10)], enemy_at=[(10, 11)])
         bot._init_turn()
         my, en = bot.my_ants, bot.enemy_ants
-        score = bot._eval_battle(my, (my[0].tile,), en, (en[0].tile,))
+        score = bot._eval_battle((my[0].tile,), (en[0].tile,))
         # 1 enemy dead - 1 my dead = 0; positional bonuses are tiny.
         assert score == 0
 
@@ -126,8 +126,7 @@ class TestEvalBattle:
         my, en = bot.my_ants, bot.enemy_ants
         # Stay-stay scenario.
         score = bot._eval_battle(
-            my, (my[0].tile, my[1].tile),
-            en, (en[0].tile,),
+            (my[0].tile, my[1].tile), (en[0].tile,)
         )
         # 1 enemy_dead - 0 my_dead = 1000 (kill weight).
         # Plus 0 movement bonus (stay).
@@ -143,8 +142,7 @@ class TestEvalBattle:
         bot._init_turn()
         my, en = bot.my_ants, bot.enemy_ants
         score = bot._eval_battle(
-            my, (my[0].tile,),
-            en, (en[0].tile, en[1].tile),
+            (my[0].tile,), (en[0].tile, en[1].tile)
         )
         assert score == -1000
 
@@ -152,10 +150,7 @@ class TestEvalBattle:
         bot = _build(xb, my_at=[(10, 10)], enemy_at=[(15, 15)])
         bot._init_turn()
         my, en = bot.my_ants, bot.enemy_ants
-        score = bot._eval_battle(
-            my, (my[0].tile,),
-            en, (en[0].tile,),
-        )
+        score = bot._eval_battle((my[0].tile,), (en[0].tile,))
         assert score == 0
 
 

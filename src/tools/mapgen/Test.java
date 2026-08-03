@@ -16,7 +16,6 @@ public class Test {
             sb.append("m ");
             for (int c = 0; c < map[0].length; c++) {
                 sb.append(form(map[r][c]));
-                //sb.append(getVal4(r, c));
             }
             sb.append("\n");
         }

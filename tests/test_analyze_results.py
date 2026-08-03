@@ -188,6 +188,11 @@ class TestAntsAIAnalyzerAnalysis:
         assert report["total_games"] == 6
         assert "summary" in report
         assert "game_level_analysis" in report
+        first_game = report["summary"][0]["game_results"][0]
+        assert first_game["test_name"] == "vs RandomBot"
+        assert first_game["timestamp"] == "2026-01-01_00-00-00"
+        assert first_game["food_collected"] == 5
+        assert first_game["enemy_food_collected"] == 1
 
     def test_plot_performance_writes_file(
         self,

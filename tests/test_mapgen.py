@@ -12,6 +12,7 @@ import py_compile
 import subprocess
 import sys
 from pathlib import Path
+from types import ModuleType
 
 import pytest
 
@@ -79,3 +80,66 @@ def test_mapgen_print_map_runs_as_script() -> None:
     assert head[0].startswith("rows ")
     assert head[1].startswith("cols ")
     assert head[2].startswith("players ")
+
+
+def test_tile_preserves_seeded_mirroring_draws(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Cleanup must not shift the seeded generator's random sequence."""
+    sys.path.insert(0, str(MAPGEN_DIR))
+    try:
+        spec = importlib.util.find_spec("map")
+        assert spec is not None and spec.loader is not None
+        map_module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(map_module)
+    finally:
+        sys.path.remove(str(MAPGEN_DIR))
+
+    draws: list[tuple[int, int]] = []
+
+    def record_choice(options):
+        draws.append(tuple(options))
+        return options[0]
+
+    monkeypatch.setattr(map_module, "choice", record_choice)
+    generated_map = map_module.Map({"seed": 7})
+    generated_map.map = [[map_module.LAND]]
+    generated_map.tile((2, 2))
+
+    assert draws == [(0, 2), (0, 2)]
+
+
+def test_delaunay_preserves_seeded_compatibility_draws(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """The unfinished prototype still consumes its historical two draws."""
+    for name in ("Image", "ImageDraw", "ImageChops"):
+        monkeypatch.setitem(sys.modules, name, ModuleType(name))
+
+    spec = importlib.util.spec_from_file_location(
+        "mcmaps_under_test", MAPGEN_DIR / "McMaps.py"
+    )
+    assert spec is not None and spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+
+    draws: list[float] = []
+    monkeypatch.setattr(module, "random", lambda: draws.append(0.5) or 0.5)
+    monkeypatch.setattr(module, "draw_line", lambda image, *_args: image)
+
+    class FakeImage:
+        def save(self, _path: str) -> None:
+            return None
+
+    class FakeDraw:
+        def rectangle(self, *_args, **_kwargs) -> None:
+            return None
+
+    monkeypatch.setattr(
+        module.Image, "new", lambda *_args, **_kwargs: FakeImage(), raising=False
+    )
+    monkeypatch.setattr(
+        module.ImageDraw, "Draw", lambda _image: FakeDraw(), raising=False
+    )
+
+    module.delaunay()
+
+    assert draws == [0.5, 0.5]

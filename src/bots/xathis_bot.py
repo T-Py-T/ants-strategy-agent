@@ -39,7 +39,7 @@ from typing import Deque, Dict, List, Optional, Set, Tuple
 # Reuse the shared helper API for stdio + map state. Constants we use:
 #   MY_ANT (0), LAND (-2), FOOD (-3), WATER (-4), UNSEEN (-5), HILL (-6)
 #   AIM = {'n': (-1, 0), ...}
-from ants import (  # type: ignore[import-not-found]
+from ants import (  # type: ignore[import-not-found]  # pylint: disable=no-name-in-module
     AIM,
     ANTS,
     DEAD,
@@ -52,13 +52,12 @@ from ants import (  # type: ignore[import-not-found]
     Ants,
 )
 
-
 # ---------------------------------------------------------------------------
 # Tunable constants (lifted directly from Strategy.java)
 # ---------------------------------------------------------------------------
 # CLOSE_ENEMY_RADIUS — Strategy.java:21
 CLOSE_ENEMY_RADIUS: int = 9
-CLOSE_ENEMY_RADIUS2: int = CLOSE_ENEMY_RADIUS ** 2
+CLOSE_ENEMY_RADIUS2: int = CLOSE_ENEMY_RADIUS**2
 
 # AREA_DIST — Strategy.java:23
 AREA_DIST: int = 20
@@ -102,17 +101,25 @@ class Tile:
     """
 
     __slots__ = (
-        "row", "col", "tile_type",
-        "ant", "old_ant",
+        "row",
+        "col",
+        "tile_type",
+        "ant",
+        "old_ant",
         "neighbors",
-        "is_hill", "hill_player",
+        "is_hill",
+        "hill_player",
         # bfs scratch (not reset between turns)
-        "dist", "hill_dist", "prev",
+        "dist",
+        "hill_dist",
+        "prev",
         "is_reached",
         # food bfs
         "source",
         # explore
-        "explore_value", "prev_firsts", "has_new_land",
+        "explore_value",
+        "prev_firsts",
+        "has_new_land",
         # A*
         "f",
         # distribute
@@ -120,9 +127,12 @@ class Tile:
         # combat simulation
         "has_virt_ant",
         # areas
-        "start_tile", "is_in_my_area", "is_border",
+        "start_tile",
+        "is_in_my_area",
+        "is_border",
         # willStay detection
-        "stay_turn_count", "stay_value",
+        "stay_turn_count",
+        "stay_value",
         # dep tables
         "is_checked",
     )
@@ -194,25 +204,32 @@ class Ant:
 
     __slots__ = (
         "tile",
-        "is_dangered", "is_indirectly_dangered",
-        "has_moved", "has_mission",
+        "is_dangered",
+        "is_indirectly_dangered",
+        "has_moved",
+        "has_mission",
         "is_detached",
-        "close_enemy_dists",     # list[(dist2, Ant)] sorted
+        "close_enemy_dists",  # list[(dist2, Ant)] sorted
         "closest_enemy_tile",
         "close_enemy_dists_sum",
         "closest_enemy",
         "closest_enemy_dist",
         "num_close_enemies",
-        "gamma_dist_enemies",    # list[Ant]
-        "is_dead", "weakness",
-        "is_reached", "is_grouped", "is_gamma_grouped",
-        "curr_to", "best_to",
+        "gamma_dist_enemies",  # list[Ant]
+        "is_dead",
+        "weakness",
+        "is_reached",
+        "is_grouped",
+        "is_gamma_grouped",
+        "curr_to",
+        "best_to",
         "comp_value",
         "mission",
         "num_close_own_ants",
         "will_stay",
         "dep_table",
-        "check_all", "check_neighbors",
+        "check_all",
+        "check_neighbors",
         "dist_map",
     )
 
@@ -318,10 +335,10 @@ class XathisBot:
             for c in range(self.cols):
                 tile = self.tiles[r][c]
                 tile.neighbors = (
-                    self.tiles[(r - 1) % self.rows][c],   # n
-                    self.tiles[r][(c + 1) % self.cols],   # e
-                    self.tiles[(r + 1) % self.rows][c],   # s
-                    self.tiles[r][(c - 1) % self.cols],   # w
+                    self.tiles[(r - 1) % self.rows][c],  # n
+                    self.tiles[r][(c + 1) % self.cols],  # e
+                    self.tiles[(r + 1) % self.rows][c],  # s
+                    self.tiles[r][(c - 1) % self.cols],  # w
                 )
 
     def _prune_water_neighbors(self, ants: Ants) -> None:
@@ -340,7 +357,9 @@ class XathisBot:
                         # Remove this tile from each of its (former) neighbors.
                         for n in tile.neighbors:
                             if tile in n.neighbors:
-                                n.neighbors = tuple(x for x in n.neighbors if x is not tile)
+                                n.neighbors = tuple(
+                                    x for x in n.neighbors if x is not tile
+                                )
                         tile.neighbors = ()
 
     # ------------------------------------------------------------------
@@ -438,7 +457,7 @@ class XathisBot:
             else:
                 self.enemy_ants.append(ant)
 
-        for (r, c) in ants.food_list:
+        for r, c in ants.food_list:
             tile = self.tiles[r][c]
             if tile.tile_type == LAND:  # don't override an ant on the food
                 tile.tile_type = FOOD
@@ -492,7 +511,7 @@ class XathisBot:
         a free, safe neighbor. Keeps the spawn pipeline unblocked until
         the real ``distribute`` / ``explore`` phases land.
         """
-        my_hill_set = {h for h in self.my_hills}
+        my_hill_set = set(self.my_hills)
         for ant in self.my_ants:
             if ant.has_moved or ant.tile not in my_hill_set:
                 continue
@@ -519,9 +538,11 @@ class XathisBot:
         # xathis just iterates every pair.
         my_ants = self.my_ants
         for i, a in enumerate(my_ants):
-            for b in my_ants[i + 1:]:
-                if (self.dist_row(a.tile, b.tile) <= 5
-                        and self.dist_col(a.tile, b.tile) <= 5):
+            for b in my_ants[i + 1 :]:
+                if (
+                    self.dist_row(a.tile, b.tile) <= 5
+                    and self.dist_col(a.tile, b.tile) <= 5
+                ):
                     a.num_close_own_ants += 1
                     b.num_close_own_ants += 1
 
@@ -549,18 +570,22 @@ class XathisBot:
                 my_ant.close_enemy_dists_sum += d2
                 enemy_ant.close_enemy_dists_sum += d2
                 # gamma: dr+dc ≤ 5, except the two corner cases (0,5)/(5,0)
-                if (dx + dy <= 5
-                        and not (dx == 0 and dy == 5)
-                        and not (dy == 0 and dx == 5)):
+                if (
+                    dx + dy <= 5
+                    and not (dx == 0 and dy == 5)
+                    and not (dy == 0 and dx == 5)
+                ):
                     if not my_ant.is_indirectly_dangered:
                         my_ant.is_indirectly_dangered = True
                     my_ant.gamma_dist_enemies.append(enemy_ant)
                     enemy_ant.gamma_dist_enemies.append(my_ant)
                     # dangered: dr+dc ≤ 4, except (0,4)/(4,0)
-                    if (not my_ant.is_dangered
-                            and dx + dy <= 4
-                            and not (dx == 0 and dy == 4)
-                            and not (dy == 0 and dx == 4)):
+                    if (
+                        not my_ant.is_dangered
+                        and dx + dy <= 4
+                        and not (dx == 0 and dy == 4)
+                        and not (dy == 0 and dx == 4)
+                    ):
                         my_ant.is_dangered = True
                         self.dangered_ants.append(my_ant)
             if close:
@@ -578,9 +603,11 @@ class XathisBot:
         # An enemy is "detached" if no other enemy is within (5,5) of it.
         # Used by attackDetachedEnemies. O(n²) again.
         for i, a in enumerate(self.enemy_ants):
-            for b in self.enemy_ants[i + 1:]:
-                if (self.dist_row(a.tile, b.tile) <= 5
-                        and self.dist_col(a.tile, b.tile) <= 5):
+            for b in self.enemy_ants[i + 1 :]:
+                if (
+                    self.dist_row(a.tile, b.tile) <= 5
+                    and self.dist_col(a.tile, b.tile) <= 5
+                ):
                     a.is_detached = False
                     b.is_detached = False
 
@@ -693,9 +720,11 @@ class XathisBot:
                         # (i.e. to the tile we expanded from). Skip if the
                         # predecessor is another my-ant, the ant already
                         # moved, or it's unsafe.
-                        if (not ant.has_moved
-                                and t.tile_type != MY_ANT
-                                and self.is_tile_safe(ant, t)):
+                        if (
+                            not ant.has_moved
+                            and t.tile_type != MY_ANT
+                            and self.is_tile_safe(ant, t)
+                        ):
                             self.do_move(n, t, "enemy hill")
                         count -= 1
                     n.dist = t.dist + 1
@@ -756,9 +785,13 @@ class XathisBot:
                 continue
 
             # If the wave reached one of my ants, that ant claims the food.
-            if (t.tile_type == MY_ANT and t.ant is not None and not t.ant.has_moved
-                    and t.prev is not None
-                    and t.prev.tile_type != MY_ANT):
+            if (
+                t.tile_type == MY_ANT
+                and t.ant is not None
+                and not t.ant.has_moved
+                and t.prev is not None
+                and t.prev.tile_type != MY_ANT
+            ):
                 ant = t.ant
                 # If the food is adjacent (prev is the food itself), just
                 # stay put and let the ant pick it up next turn.
@@ -1012,9 +1045,7 @@ class XathisBot:
             for enemy_combo in self._iter_combos(enemy_options):
                 if len(set(enemy_combo)) != len(enemy_combo):
                     continue
-                score = self._eval_battle(
-                    my_group, my_combo, enemy_group, enemy_combo
-                )
+                score = self._eval_battle(my_combo, enemy_combo)
                 if score < worst_score:
                     worst_score = score
                     if worst_score <= best_score:
@@ -1065,8 +1096,9 @@ class XathisBot:
             if i == n:
                 return
 
-    def _eval_battle(self, my_group: List[Ant], my_combo: Tuple[Tile, ...],
-                     enemy_group: List[Ant], enemy_combo: Tuple[Tile, ...]) -> int:
+    def _eval_battle(
+        self, my_combo: Tuple[Tile, ...], enemy_combo: Tuple[Tile, ...]
+    ) -> int:
         """Score = (enemy_dead − my_dead) under official AI Challenge
         battle resolution applied to the post-move positions.
 
@@ -1191,8 +1223,7 @@ class XathisBot:
             defender: Optional[Ant] = None
             step_after_defender: Optional[Tile] = None  # the step toward enemy
             while t is not None and not t.is_hill:
-                if (t.tile_type == MY_ANT and t.ant is not None
-                        and not t.ant.has_moved):
+                if t.tile_type == MY_ANT and t.ant is not None and not t.ant.has_moved:
                     defender = t.ant
                     break
                 step_after_defender = t
@@ -1205,8 +1236,11 @@ class XathisBot:
                 t = enemy_tile
                 while t is not None and not t.is_hill:
                     for n in t.neighbors:
-                        if (n.tile_type == MY_ANT and n.ant is not None
-                                and not n.ant.has_moved):
+                        if (
+                            n.tile_type == MY_ANT
+                            and n.ant is not None
+                            and not n.ant.has_moved
+                        ):
                             defender = n.ant
                             step_after_defender = t
                             break
@@ -1461,7 +1495,7 @@ class XathisBot:
     # ------------------------------------------------------------------
     # Move issuing
     # ------------------------------------------------------------------
-    def do_move(self, src: Tile, dest: Tile, info: str = "") -> bool:
+    def do_move(self, src: Tile, dest: Tile, _info: str = "") -> bool:
         """Issue a move from ``src`` to ``dest`` (must be a direct neighbor).
 
         Mirrors ``Strategy.doMove`` (Strategy.java:1656). Returns True if
@@ -1489,7 +1523,7 @@ class XathisBot:
 
 def main() -> None:
     try:
-        Ants.run(XathisBot())
+        Ants.run(XathisBot())  # pylint: disable=no-member
     except KeyboardInterrupt:
         print("ctrl-c, leaving ...")
 
