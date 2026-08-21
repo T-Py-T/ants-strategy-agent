@@ -23,6 +23,7 @@ analysis = [
 ]
 dev = [
     "ants-strategy-agent[test,analysis]",
+    "pre-commit>=4.3.0",
 ]
 
 [tool.uv]
