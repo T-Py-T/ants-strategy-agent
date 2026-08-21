@@ -1,0 +1,492 @@
+[
+  {
+    "matchup": "vs_RandomBot",
+    "master_seed": 42,
+    "tally": {
+      "wins": 0,
+      "losses": 0,
+      "draws": 2,
+      "errors": 0,
+      "win_rate": 0.0,
+      "avg_turns": 175.0,
+      "avg_time": 2.4224001045004115,
+      "avg_our_score": 1.0
+    },
+    "games": [
+      {
+        "game_id": 0,
+        "turns": 150,
+        "winner": "tie(player_0,player_1)",
+        "outcome": "DRAW",
+        "duration_s": 2.121582459003548,
+        "engine_seed": 670488,
+        "player_seed": 116740,
+        "players": [
+          {
+            "idx": 0,
+            "name": "bot.py",
+            "rank": 0,
+            "score": 1,
+            "status": "survived"
+          },
+          {
+            "idx": 1,
+            "name": "RandomBot.py",
+            "rank": 0,
+            "score": 1,
+            "status": "survived"
+          }
+        ]
+      },
+      {
+        "game_id": 0,
+        "turns": 200,
+        "winner": "tie(player_0,player_1)",
+        "outcome": "DRAW",
+        "duration_s": 2.723217749997275,
+        "engine_seed": 26226,
+        "player_seed": 777573,
+        "players": [
+          {
+            "idx": 0,
+            "name": "bot.py",
+            "rank": 0,
+            "score": 1,
+            "status": "survived"
+          },
+          {
+            "idx": 1,
+            "name": "RandomBot.py",
+            "rank": 0,
+            "score": 1,
+            "status": "survived"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "matchup": "vs_HoldBot",
+    "master_seed": 42,
+    "tally": {
+      "wins": 0,
+      "losses": 0,
+      "draws": 2,
+      "errors": 0,
+      "win_rate": 0.0,
+      "avg_turns": 175.0,
+      "avg_time": 2.401535103992501,
+      "avg_our_score": 1.0
+    },
+    "games": [
+      {
+        "game_id": 0,
+        "turns": 150,
+        "winner": "tie(player_0,player_1)",
+        "outcome": "DRAW",
+        "duration_s": 2.1065507079911185,
+        "engine_seed": 288390,
+        "player_seed": 256788,
+        "players": [
+          {
+            "idx": 0,
+            "name": "bot.py",
+            "rank": 0,
+            "score": 1,
+            "status": "survived"
+          },
+          {
+            "idx": 1,
+            "name": "HoldBot.py",
+            "rank": 0,
+            "score": 1,
+            "status": "survived"
+          }
+        ]
+      },
+      {
+        "game_id": 0,
+        "turns": 200,
+        "winner": "tie(player_0,player_1)",
+        "outcome": "DRAW",
+        "duration_s": 2.696519499993883,
+        "engine_seed": 234054,
+        "player_seed": 146317,
+        "players": [
+          {
+            "idx": 0,
+            "name": "bot.py",
+            "rank": 0,
+            "score": 1,
+            "status": "survived"
+          },
+          {
+            "idx": 1,
+            "name": "HoldBot.py",
+            "rank": 0,
+            "score": 1,
+            "status": "survived"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "matchup": "vs_HunterBot",
+    "master_seed": 42,
+    "tally": {
+      "wins": 0,
+      "losses": 0,
+      "draws": 2,
+      "errors": 0,
+      "win_rate": 0.0,
+      "avg_turns": 175.0,
+      "avg_time": 2.4051814999984344,
+      "avg_our_score": 1.0
+    },
+    "games": [
+      {
+        "game_id": 0,
+        "turns": 200,
+        "winner": "tie(player_0,player_1)",
+        "outcome": "DRAW",
+        "duration_s": 2.7213554170011776,
+        "engine_seed": 772247,
+        "player_seed": 107474,
+        "players": [
+          {
+            "idx": 0,
+            "name": "bot.py",
+            "rank": 0,
+            "score": 1,
+            "status": "survived"
+          },
+          {
+            "idx": 1,
+            "name": "HunterBot.py",
+            "rank": 0,
+            "score": 1,
+            "status": "survived"
+          }
+        ]
+      },
+      {
+        "game_id": 0,
+        "turns": 150,
+        "winner": "tie(player_0,player_1)",
+        "outcome": "DRAW",
+        "duration_s": 2.0890075829956913,
+        "engine_seed": 709571,
+        "player_seed": 776647,
+        "players": [
+          {
+            "idx": 0,
+            "name": "bot.py",
+            "rank": 0,
+            "score": 1,
+            "status": "survived"
+          },
+          {
+            "idx": 1,
+            "name": "HunterBot.py",
+            "rank": 0,
+            "score": 1,
+            "status": "survived"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "matchup": "vs_GreedyBot",
+    "master_seed": 42,
+    "tally": {
+      "wins": 0,
+      "losses": 0,
+      "draws": 2,
+      "errors": 0,
+      "win_rate": 0.0,
+      "avg_turns": 200.0,
+      "avg_time": 2.749630916492606,
+      "avg_our_score": 1.0
+    },
+    "games": [
+      {
+        "game_id": 0,
+        "turns": 200,
+        "winner": "tie(player_0,player_1)",
+        "outcome": "DRAW",
+        "duration_s": 2.770608207996702,
+        "engine_seed": 935519,
+        "player_seed": 571859,
+        "players": [
+          {
+            "idx": 0,
+            "name": "bot.py",
+            "rank": 0,
+            "score": 1,
+            "status": "survived"
+          },
+          {
+            "idx": 1,
+            "name": "GreedyBot.py",
+            "rank": 0,
+            "score": 1,
+            "status": "survived"
+          }
+        ]
+      },
+      {
+        "game_id": 0,
+        "turns": 200,
+        "winner": "tie(player_0,player_1)",
+        "outcome": "DRAW",
+        "duration_s": 2.7286536249885103,
+        "engine_seed": 91162,
+        "player_seed": 619177,
+        "players": [
+          {
+            "idx": 0,
+            "name": "bot.py",
+            "rank": 0,
+            "score": 1,
+            "status": "survived"
+          },
+          {
+            "idx": 1,
+            "name": "GreedyBot.py",
+            "rank": 0,
+            "score": 1,
+            "status": "survived"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "matchup": "vs_LeftyBot",
+    "master_seed": 42,
+    "tally": {
+      "wins": 0,
+      "losses": 0,
+      "draws": 2,
+      "errors": 0,
+      "win_rate": 0.0,
+      "avg_turns": 200.0,
+      "avg_time": 2.791091104496445,
+      "avg_our_score": 1.0
+    },
+    "games": [
+      {
+        "game_id": 0,
+        "turns": 200,
+        "winner": "tie(player_0,player_1)",
+        "outcome": "DRAW",
+        "duration_s": 2.7783152089978103,
+        "engine_seed": 442418,
+        "player_seed": 33327,
+        "players": [
+          {
+            "idx": 0,
+            "name": "bot.py",
+            "rank": 0,
+            "score": 1,
+            "status": "survived"
+          },
+          {
+            "idx": 1,
+            "name": "LeftyBot.py",
+            "rank": 0,
+            "score": 1,
+            "status": "survived"
+          }
+        ]
+      },
+      {
+        "game_id": 0,
+        "turns": 200,
+        "winner": "tie(player_0,player_1)",
+        "outcome": "DRAW",
+        "duration_s": 2.80386699999508,
+        "engine_seed": 31245,
+        "player_seed": 98247,
+        "players": [
+          {
+            "idx": 0,
+            "name": "bot.py",
+            "rank": 0,
+            "score": 1,
+            "status": "survived"
+          },
+          {
+            "idx": 1,
+            "name": "LeftyBot.py",
+            "rank": 0,
+            "score": 1,
+            "status": "survived"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "matchup": "vs_XathisBot",
+    "master_seed": 42,
+    "tally": {
+      "wins": 0,
+      "losses": 0,
+      "draws": 2,
+      "errors": 0,
+      "win_rate": 0.0,
+      "avg_turns": 200.0,
+      "avg_time": 2.747362187503313,
+      "avg_our_score": 1.0
+    },
+    "games": [
+      {
+        "game_id": 0,
+        "turns": 200,
+        "winner": "tie(player_0,player_1)",
+        "outcome": "DRAW",
+        "duration_s": 2.7681762910069665,
+        "engine_seed": 229259,
+        "player_seed": 243963,
+        "players": [
+          {
+            "idx": 0,
+            "name": "bot.py",
+            "rank": 0,
+            "score": 1,
+            "status": "survived"
+          },
+          {
+            "idx": 1,
+            "name": "xathis_bot.py",
+            "rank": 0,
+            "score": 1,
+            "status": "survived"
+          }
+        ]
+      },
+      {
+        "game_id": 0,
+        "turns": 200,
+        "winner": "tie(player_0,player_1)",
+        "outcome": "DRAW",
+        "duration_s": 2.72654808399966,
+        "engine_seed": 529904,
+        "player_seed": 631263,
+        "players": [
+          {
+            "idx": 0,
+            "name": "bot.py",
+            "rank": 0,
+            "score": 1,
+            "status": "survived"
+          },
+          {
+            "idx": 1,
+            "name": "xathis_bot.py",
+            "rank": 0,
+            "score": 1,
+            "status": "survived"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "matchup": "Four_Player",
+    "master_seed": 42,
+    "tally": {
+      "wins": 0,
+      "losses": 0,
+      "draws": 2,
+      "errors": 0,
+      "win_rate": 0.0,
+      "avg_turns": 195.5,
+      "avg_time": 2.9632284789986443,
+      "avg_our_score": 1.0
+    },
+    "games": [
+      {
+        "game_id": 0,
+        "turns": 191,
+        "winner": "tie(player_0,player_1,player_2,player_3)",
+        "outcome": "DRAW",
+        "duration_s": 2.7103229999920586,
+        "engine_seed": 27825,
+        "player_seed": 588509,
+        "players": [
+          {
+            "idx": 0,
+            "name": "bot.py",
+            "rank": 0,
+            "score": 1,
+            "status": "survived"
+          },
+          {
+            "idx": 1,
+            "name": "RandomBot.py",
+            "rank": 0,
+            "score": 1,
+            "status": "survived"
+          },
+          {
+            "idx": 2,
+            "name": "HunterBot.py",
+            "rank": 0,
+            "score": 1,
+            "status": "survived"
+          },
+          {
+            "idx": 3,
+            "name": "GreedyBot.py",
+            "rank": 0,
+            "score": 1,
+            "status": "survived"
+          }
+        ]
+      },
+      {
+        "game_id": 0,
+        "turns": 200,
+        "winner": "tie(player_0,player_1,player_2,player_3)",
+        "outcome": "DRAW",
+        "duration_s": 3.21613395800523,
+        "engine_seed": 208497,
+        "player_seed": 750801,
+        "players": [
+          {
+            "idx": 0,
+            "name": "bot.py",
+            "rank": 0,
+            "score": 1,
+            "status": "survived"
+          },
+          {
+            "idx": 1,
+            "name": "RandomBot.py",
+            "rank": 0,
+            "score": 1,
+            "status": "survived"
+          },
+          {
+            "idx": 2,
+            "name": "HunterBot.py",
+            "rank": 0,
+            "score": 1,
+            "status": "survived"
+          },
+          {
+            "idx": 3,
+            "name": "GreedyBot.py",
+            "rank": 0,
+            "score": 1,
+            "status": "survived"
+          }
+        ]
+      }
+    ]
+  }
+]

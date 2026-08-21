@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "benchmark_id": "current-evidence-v1",
+  "code_sha": "69bc75d6e6bb26c5f68ca02432bf313aae4aa2b2",
+  "generated_at": "2026-08-21T17:54:49-04:00",
+  "artifacts": [
+    {
+      "path": "benchmarks/current-evidence-v1.json",
+      "bytes": 4000,
+      "sha256": "c081fd8868cc6a3397492a1d173926ebc87e1b824c6b1ee29cffde2cf818ba6b"
+    },
+    {
+      "path": "results/current-evidence-v1/README.md",
+      "bytes": 2093,
+      "sha256": "72edd883f82a668712c7d284fb3e0d34e659bce7056c08825caec9f185d09e30"
+    },
+    {
+      "path": "results/current-evidence-v1/environment.json",
+      "bytes": 532,
+      "sha256": "839882a2006beb3994d32645e6f0bb861a9bbe231ca2e19edd4b4eb0777a5d64"
+    },
+    {
+      "path": "results/current-evidence-v1/benchmark-raw.json",
+      "bytes": 10911,
+      "sha256": "d1875a75aa43d6c1f0a4cc02cf8b77819bf1458751d9d7dcc443ee5d20588fdb"
+    },
+    {
+      "path": "results/current-evidence-v1/deterministic-result.json",
+      "bytes": 10071,
+      "sha256": "ee17c78c8c211d50753d35cd9ac8772dc75d7de7431efcb9435ded71498a9be5"
+    },
+    {
+      "path": "results/current-evidence-v1/benchmark-summary.md",
+      "bytes": 559,
+      "sha256": "0d410d1d21cfcfa0ac47a56c1966033404142dbfe7fcac4ca82723399155df8e"
+    },
+    {
+      "path": "results/current-evidence-v1/replay/four-player-final.replay",
+      "bytes": 21087,
+      "sha256": "f3b007548a1e3d6c69141e2bd70d3e97b0c6d411b78e486404ff25b5d903c086"
+    }
+  ]
+}
