@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "benchmark_id": "current-evidence-v1",
+  "repository": "T-Py-T/ants-strategy-agent",
+  "code_sha": "69bc75d6e6bb26c5f68ca02432bf313aae4aa2b2",
+  "captured_at": "2026-08-21T17:54:49-04:00",
+  "platform": "macOS 26.6.1",
+  "architecture": "arm64",
+  "python": "3.13.14",
+  "uv": "0.12.5",
+  "command": "uv run python scripts/benchmark.py --quick --seed 42 --log-dir <TMP>/logs --output-dir <TMP>/summary",
+  "network_required": false,
+  "external_service_required": false,
+  "credentials_required": false
+}

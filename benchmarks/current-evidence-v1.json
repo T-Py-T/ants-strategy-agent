@@ -1,0 +1,64 @@
+{
+  "schema_version": 1,
+  "benchmark_id": "current-evidence-v1",
+  "repository": "T-Py-T/ants-strategy-agent",
+  "code_sha": "69bc75d6e6bb26c5f68ca02432bf313aae4aa2b2",
+  "command": "uv run python scripts/benchmark.py --quick --seed 42 --log-dir <TMP>/logs --output-dir <TMP>/summary",
+  "runner_sha256": "2d5ebc92da182f7b2a49a0f4d4c3c7aa0ac2e87ff49543df38ccad267715eddd",
+  "master_seed": 42,
+  "games_per_matchup": 2,
+  "turn_limit": 200,
+  "end_wait_seconds": 0.1,
+  "seed_derivation": "Python random.Random(42), two randint(1, 1000000) calls per game for engine_seed then player_seed",
+  "maps": [
+    {
+      "path": "maps/maze/maze_02p_01.map",
+      "sha256": "8ab9927bfa362827614fe5fd5aea3c5f341a697fbce35eeb54e5bb2e1c33415e"
+    },
+    {
+      "path": "maps/maze/maze_04p_01.map",
+      "sha256": "b80d56016f43d110f2bfb3612f4697c10682d65edadf647d05f70ec03aea6b85"
+    }
+  ],
+  "bot_under_test": {
+    "path": "src/bots/bot.py",
+    "sha256": "4dc8e416ac869cd79ae6a541428db450fef840a5fdf64c92ea8346f38e1d20e9"
+  },
+  "opponents": [
+    {"name": "RandomBot", "path": "src/sample_bots/python/RandomBot.py", "sha256": "3ca8c21cfb6aa7c4db126a7524a1b8fdb0296dc0506705b23023798e670f33c9"},
+    {"name": "HoldBot", "path": "src/sample_bots/python/HoldBot.py", "sha256": "247c6965394856b9a149542635c968f8cf0df998d4fa32dd519c670a394ac42d"},
+    {"name": "HunterBot", "path": "src/sample_bots/python/HunterBot.py", "sha256": "615b2c4baab0d40df6db27fbfe5ae483fd3ea678cbe9da6a18263767363ecbd8"},
+    {"name": "GreedyBot", "path": "src/sample_bots/python/GreedyBot.py", "sha256": "4d8476e8c24b7602f067531fa65fcd45f3c428fd93db0f70bb8c4ccda948608b"},
+    {"name": "LeftyBot", "path": "src/sample_bots/python/LeftyBot.py", "sha256": "4cc91355e04e28db4a739881c7851c7e6f5282b10018275f0f68e4945d873726"},
+    {"name": "XathisBot partial reimplementation", "path": "src/bots/xathis_bot.py", "sha256": "8ea871ea78a897fb7be6a91d40100fab804a62209c0ef357f5b228b5de68660c"}
+  ],
+  "matchups": [
+    {"name": "vs_RandomBot", "map": "maps/maze/maze_02p_01.map", "players": ["src/bots/bot.py", "src/sample_bots/python/RandomBot.py"]},
+    {"name": "vs_HoldBot", "map": "maps/maze/maze_02p_01.map", "players": ["src/bots/bot.py", "src/sample_bots/python/HoldBot.py"]},
+    {"name": "vs_HunterBot", "map": "maps/maze/maze_02p_01.map", "players": ["src/bots/bot.py", "src/sample_bots/python/HunterBot.py"]},
+    {"name": "vs_GreedyBot", "map": "maps/maze/maze_02p_01.map", "players": ["src/bots/bot.py", "src/sample_bots/python/GreedyBot.py"]},
+    {"name": "vs_LeftyBot", "map": "maps/maze/maze_02p_01.map", "players": ["src/bots/bot.py", "src/sample_bots/python/LeftyBot.py"]},
+    {"name": "vs_XathisBot", "map": "maps/maze/maze_02p_01.map", "players": ["src/bots/bot.py", "src/bots/xathis_bot.py"]},
+    {"name": "Four_Player", "map": "maps/maze/maze_04p_01.map", "players": ["src/bots/bot.py", "src/sample_bots/python/RandomBot.py", "src/sample_bots/python/HunterBot.py", "src/sample_bots/python/GreedyBot.py"]}
+  ],
+  "outcome_rules": {
+    "win": "player_0 is the unique rank-0 player",
+    "draw": "player_0 shares rank 0 with at least one other player",
+    "loss": "player_0 is not rank 0",
+    "error": "the engine emits no parseable RESULT line or reports an error winner"
+  },
+  "representative_replay": {
+    "path": "results/current-evidence-v1/replay/four-player-final.replay",
+    "matchup": "Four_Player",
+    "game_index": 2,
+    "engine_seed": 208497,
+    "player_seed": 750801
+  },
+  "limitations": [
+    "This packet uses one master seed and two games per matchup.",
+    "It is a deterministic regression and evidence-path sample, not a statistically significant strength estimate.",
+    "The partial Xathis reimplementation is not strategically equivalent to the historical winning Java bot.",
+    "Wall-clock durations vary by machine and are excluded from deterministic-result comparison.",
+    "The observed all-draw result must not be generalized beyond this exact workload and code SHA."
+  ]
+}

@@ -3,7 +3,7 @@
 
 SEED ?= 42
 
-.PHONY: help install install-uv pytest pytest-quick pytest-coverage test test-quick test-full test-against-samples test-against-random test-against-hunter test-against-greedy test-against-lefty test-vs-xathis test-self test-visualize benchmark benchmark-quick benchmark-xathis clean docker-build docker-test docker-run stats stats-json stats-parallel
+.PHONY: help install install-uv pytest pytest-quick pytest-coverage test test-quick test-full test-against-samples test-against-random test-against-hunter test-against-greedy test-against-lefty test-vs-xathis test-self test-visualize visualize-evidence visualize-latest benchmark benchmark-quick benchmark-xathis clean docker-build docker-test docker-run stats stats-json stats-parallel
 
 # Default target
 help:
@@ -46,6 +46,7 @@ help:
 	@echo ""
 	@echo "Visualization:"
 	@echo "  test-visualize   Run test with live visualization"
+	@echo "  visualize-evidence Open the retained portfolio evidence replay"
 	@echo "  visualize-latest Visualize the most recent game replay"
 	@echo ""
 	@echo "Docker:"
@@ -461,6 +462,12 @@ test-visualize:
 		"python3 src/sample_bots/python/HunterBot.py" \
 		"python3 src/sample_bots/python/GreedyBot.py" | \
 	java -jar visualizer/visualizer.jar
+
+# Open the retained current-SHA replay used by the public evidence packet.
+visualize-evidence:
+	@echo "Opening retained evidence replay..."
+	@python3 visualizer/visualize_locally.py \
+		results/current-evidence-v1/replay/four-player-final.replay
 
 # Visualize the most recent game replay
 visualize-latest:

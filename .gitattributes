@@ -1,2 +1,6 @@
 # Force LF for all files
 * text eol=lf
+
+# The legacy replay visualizer assets are binary. Treating them as text strips
+# carriage returns from the PNG signature and prevents every image from loading.
+*.png binary
