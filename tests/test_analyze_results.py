@@ -25,7 +25,9 @@ def _load_analyzer_module():
     """Import scripts/analyze_results.py by file path (it isn't a package)."""
 
     path = REPO_ROOT / "scripts" / "analyze_results.py"
-    spec = importlib.util.spec_from_file_location("antsaibot_analyze_results", path)
+    spec = importlib.util.spec_from_file_location(
+        "ants_strategy_agent_analyze_results", path
+    )
     assert spec is not None and spec.loader is not None
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
@@ -119,7 +121,9 @@ def synthetic_results(tmp_path: Path) -> Path:
 
 
 class TestAntsAIAnalyzerLoading:
-    def test_loads_synthetic_results(self, analyzer_module, synthetic_results: Path) -> None:
+    def test_loads_synthetic_results(
+        self, analyzer_module, synthetic_results: Path
+    ) -> None:
         analyzer = analyzer_module.AntsAIAnalyzer(str(synthetic_results))
         assert len(analyzer.df) == 2
         # 4 + 2 game-level rows expected

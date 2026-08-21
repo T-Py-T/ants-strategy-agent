@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run head-to-head benchmarks for the user's bot vs the sample bots.
+"""Run head-to-head benchmarks for ants-strategy-agent.
 
 This replaces the legacy ``scripts/benchmark.sh`` which had a broken
 score-parsing path (every game came out as a draw because the shell heredoc
@@ -22,11 +22,11 @@ own ranking (``rank`` field of the game result):
 The script depends on the ``RESULT game_id=...`` line that ``playgame.py``
 prints by default; that contract is locked in by ``tests/test_playgame_result_line.py``.
 """
+
 from __future__ import annotations
 
 import argparse
 import json
-import os
 import random
 import re
 import shlex
@@ -57,6 +57,8 @@ class GameOutcome:
     winner: str
     players: List[dict]
     duration_s: float
+    engine_seed: Optional[int] = None
+    player_seed: Optional[int] = None
     raw_stdout: str = ""
 
     @property
@@ -112,13 +114,15 @@ def parse_result_line(stdout: str) -> Optional[GameOutcome]:
     m = matches[-1]  # last RESULT line in case of multi-round
     players = []
     for pm in PLAYER_RE.finditer(m.group("players")):
-        players.append({
-            "idx": int(pm.group("idx")),
-            "name": pm.group("name"),
-            "rank": int(pm.group("rank")),
-            "score": int(pm.group("score")),
-            "status": pm.group("status"),
-        })
+        players.append(
+            {
+                "idx": int(pm.group("idx")),
+                "name": pm.group("name"),
+                "rank": int(pm.group("rank")),
+                "score": int(pm.group("score")),
+                "status": pm.group("status"),
+            }
+        )
     if not players:
         return None
     return GameOutcome(
@@ -136,14 +140,17 @@ def run_one_game(
     map_file: Path,
     log_dir: Path,
     turns: int,
-    seed: int,
+    engine_seed: int,
+    player_seed: int,
     end_wait: float = 0.1,
 ) -> GameOutcome:
     cmd = [
         sys.executable,
         str(PLAYGAME),
+        "--engine_seed",
+        str(engine_seed),
         "--player_seed",
-        str(seed),
+        str(player_seed),
         "--end_wait={0}".format(end_wait),
         "--log_dir",
         str(log_dir),
@@ -160,6 +167,7 @@ def run_one_game(
         cwd=str(REPO_ROOT),
         capture_output=True,
         text=True,
+        check=False,
         timeout=turns * 2 + 60,
     )
     elapsed = time.monotonic() - t0
@@ -170,13 +178,25 @@ def run_one_game(
             game_id=-1,
             turns=0,
             winner="error",
-            players=[{"idx": i, "name": shlex.split(b)[-1], "rank": -1, "score": 0,
-                      "status": "no_result"} for i, b in enumerate(bots)],
+            players=[
+                {
+                    "idx": i,
+                    "name": shlex.split(b)[-1],
+                    "rank": -1,
+                    "score": 0,
+                    "status": "no_result",
+                }
+                for i, b in enumerate(bots)
+            ],
             duration_s=elapsed,
+            engine_seed=engine_seed,
+            player_seed=player_seed,
             raw_stdout=proc.stdout + "\n--- stderr ---\n" + proc.stderr,
         )
     else:
         outcome.duration_s = elapsed
+        outcome.engine_seed = engine_seed
+        outcome.player_seed = player_seed
     return outcome
 
 
@@ -193,84 +213,141 @@ def run_matchup(
     print("\n[matchup] {0}  ({1} games on {2})".format(name, games, map_file.name))
     summary = MatchupSummary(name=name)
     for i in range(1, games + 1):
-        seed = rng.randint(1, 1_000_000)
+        engine_seed = rng.randint(1, 1_000_000)
+        player_seed = rng.randint(1, 1_000_000)
         outcome = run_one_game(
             bots=bots,
             map_file=map_file,
             log_dir=log_dir,
             turns=turns,
-            seed=seed,
+            engine_seed=engine_seed,
+            player_seed=player_seed,
         )
         scores = ",".join(str(p["score"]) for p in outcome.players)
         statuses = ",".join(p["status"] for p in outcome.players)
         print(
             "  game {0}/{1}  {2:>5s}  turns={3:<4}  scores=[{4}]  status=[{5}]  ({6:.2f}s)".format(
-                i, games, outcome.outcome_label(), outcome.turns, scores, statuses, outcome.duration_s,
+                i,
+                games,
+                outcome.outcome_label(),
+                outcome.turns,
+                scores,
+                statuses,
+                outcome.duration_s,
             )
         )
         summary.games.append(outcome)
     t = summary.tally()
     print(
         "  → {0} wins / {1} losses / {2} draws / {3} errors  win_rate={4:.0f}%  avg_turns={5:.0f}".format(
-            t["wins"], t["losses"], t["draws"], t["errors"], t["win_rate"], t["avg_turns"],
+            t["wins"],
+            t["losses"],
+            t["draws"],
+            t["errors"],
+            t["win_rate"],
+            t["avg_turns"],
         )
     )
     return summary
 
 
-def write_summary(summaries: Iterable[MatchupSummary], output_dir: Path) -> Path:
+def write_summary(
+    summaries: Iterable[MatchupSummary], output_dir: Path, master_seed: int
+) -> Path:
     output_dir.mkdir(parents=True, exist_ok=True)
     timestamp = time.strftime("%Y-%m-%d_%H-%M-%S")
     summary_path = output_dir / f"summary_{timestamp}.md"
     json_path = output_dir / f"summary_{timestamp}.json"
-    lines = ["# AntsAIBot benchmark summary", "", f"Generated: {timestamp}", ""]
-    lines.append("| Matchup | Wins | Losses | Draws | Errors | Win % | Avg turns | Avg time |")
+    lines = [
+        "# ants-strategy-agent benchmark summary",
+        "",
+        f"Generated: {timestamp}",
+        f"Master seed: {master_seed}",
+        "",
+    ]
+    lines.append(
+        "| Matchup | Wins | Losses | Draws | Errors | Win % | Avg turns | Avg time |"
+    )
     lines.append("|---|---:|---:|---:|---:|---:|---:|---:|")
     json_blob = []
     for s in summaries:
         t = s.tally()
         lines.append(
             "| {name} | {wins} | {losses} | {draws} | {errors} | {win_rate:.0f}% | {avg_turns:.0f} | {avg_time:.1f}s |".format(
-                name=s.name, **t,
+                name=s.name,
+                **t,
             )
         )
-        json_blob.append({
-            "matchup": s.name,
-            "tally": t,
-            "games": [{
-                "game_id": g.game_id,
-                "turns": g.turns,
-                "winner": g.winner,
-                "outcome": g.outcome_label(),
-                "duration_s": g.duration_s,
-                "players": g.players,
-            } for g in s.games],
-        })
+        json_blob.append(
+            {
+                "matchup": s.name,
+                "master_seed": master_seed,
+                "tally": t,
+                "games": [
+                    {
+                        "game_id": g.game_id,
+                        "turns": g.turns,
+                        "winner": g.winner,
+                        "outcome": g.outcome_label(),
+                        "duration_s": g.duration_s,
+                        "engine_seed": g.engine_seed,
+                        "player_seed": g.player_seed,
+                        "players": g.players,
+                    }
+                    for g in s.games
+                ],
+            }
+        )
     summary_path.write_text("\n".join(lines) + "\n")
     json_path.write_text(json.dumps(json_blob, indent=2) + "\n")
     return summary_path
 
 
 def parse_args(argv: Optional[Sequence[str]] = None) -> argparse.Namespace:
-    p = argparse.ArgumentParser(description="Benchmark AntsAIBot vs sample bots.")
-    p.add_argument("--bot", default="src/bots/bot.py",
-                   help="Path to the bot under test (default: src/bots/bot.py)")
-    p.add_argument("--games", type=int, default=5,
-                   help="Games per matchup (default: 5)")
-    p.add_argument("--turns", type=int, default=1000,
-                   help="Maximum turns per game (default: 1000)")
-    p.add_argument("--map", default="maps/maze/maze_02p_01.map",
-                   help="Map for 2-player matchups")
-    p.add_argument("--map-4p", default="maps/maze/maze_04p_01.map",
-                   help="Map for the 4-player matchup")
-    p.add_argument("--seed", type=int, default=None,
-                   help="Master seed for reproducibility (default: random)")
-    p.add_argument("--log-dir", default="game_logs",
-                   help="Where playgame.py writes per-game replay/log files")
-    p.add_argument("--output-dir", default="benchmark_results",
-                   help="Where summary markdown and json land")
-    p.add_argument("--quick", action="store_true",
-                   help="Quick smoke-suite: 2 games per matchup, 200 turns")
+    p = argparse.ArgumentParser(
+        description="Benchmark ants-strategy-agent vs sample bots."
+    )
+    p.add_argument(
+        "--bot",
+        default="src/bots/bot.py",
+        help="Path to the bot under test (default: src/bots/bot.py)",
+    )
+    p.add_argument(
+        "--games", type=int, default=5, help="Games per matchup (default: 5)"
+    )
+    p.add_argument(
+        "--turns", type=int, default=1000, help="Maximum turns per game (default: 1000)"
+    )
+    p.add_argument(
+        "--map", default="maps/maze/maze_02p_01.map", help="Map for 2-player matchups"
+    )
+    p.add_argument(
+        "--map-4p",
+        default="maps/maze/maze_04p_01.map",
+        help="Map for the 4-player matchup",
+    )
+    p.add_argument(
+        "--seed",
+        type=int,
+        default=None,
+        help="Master seed used to derive both per-game seeds "
+        "(default: generated and reported)",
+    )
+    p.add_argument(
+        "--log-dir",
+        default="game_logs",
+        help="Where playgame.py writes per-game replay/log files",
+    )
+    p.add_argument(
+        "--output-dir",
+        default="benchmark_results",
+        help="Where summary markdown and json land",
+    )
+    p.add_argument(
+        "--quick",
+        action="store_true",
+        help="Quick smoke-suite: 2 games per matchup, 200 turns",
+    )
     return p.parse_args(argv)
 
 
@@ -280,7 +357,12 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         args.games = 2
         args.turns = 200
 
-    rng = random.Random(args.seed)
+    master_seed = (
+        args.seed
+        if args.seed is not None
+        else random.SystemRandom().randint(1, 2**63 - 1)
+    )
+    rng = random.Random(master_seed)
     bot = "{0} {1}".format(sys.executable, args.bot)
     sample = "{0} src/sample_bots/python".format(sys.executable)
 
@@ -293,22 +375,30 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     matchups = [
         ("vs_RandomBot", [bot, f"{sample}/RandomBot.py"], map_file),
-        ("vs_HoldBot",   [bot, f"{sample}/HoldBot.py"],   map_file),
+        ("vs_HoldBot", [bot, f"{sample}/HoldBot.py"], map_file),
         ("vs_HunterBot", [bot, f"{sample}/HunterBot.py"], map_file),
         ("vs_GreedyBot", [bot, f"{sample}/GreedyBot.py"], map_file),
-        ("vs_LeftyBot",  [bot, f"{sample}/LeftyBot.py"],  map_file),
-        # The "final boss": our port of the AI Challenge 2011 winner.
-        # Beating xathis_bot is the long-term goal for any ML successor.
+        ("vs_LeftyBot", [bot, f"{sample}/LeftyBot.py"], map_file),
+        # Partial local Xathis reimplementation used as a regression opponent.
         ("vs_XathisBot", [bot, xathis], map_file),
-        ("Four_Player",  [bot, f"{sample}/RandomBot.py",
-                          f"{sample}/HunterBot.py", f"{sample}/GreedyBot.py"], map_4p),
+        (
+            "Four_Player",
+            [
+                bot,
+                f"{sample}/RandomBot.py",
+                f"{sample}/HunterBot.py",
+                f"{sample}/GreedyBot.py",
+            ],
+            map_4p,
+        ),
     ]
 
-    print("AntsAIBot benchmark suite")
-    print("=========================")
+    print("ants-strategy-agent benchmark suite")
+    print("===================================")
     print("Bot under test : {0}".format(args.bot))
     print("Games/matchup  : {0}".format(args.games))
     print("Turn limit     : {0}".format(args.turns))
+    print("Master seed    : {0}".format(master_seed))
     print("2P map         : {0}".format(args.map))
     print("4P map         : {0}".format(args.map_4p))
 
@@ -317,18 +407,32 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         if not mp.exists():
             print("  [skip] {0}: map not found at {1}".format(name, mp))
             continue
-        summaries.append(run_matchup(
-            name=name, bots=bots, map_file=mp, games=args.games,
-            log_dir=log_dir, turns=args.turns, rng=rng,
-        ))
+        summaries.append(
+            run_matchup(
+                name=name,
+                bots=bots,
+                map_file=mp,
+                games=args.games,
+                log_dir=log_dir,
+                turns=args.turns,
+                rng=rng,
+            )
+        )
 
-    summary_path = write_summary(summaries, REPO_ROOT / args.output_dir)
-    print("\nSummary written to {0}".format(summary_path.relative_to(REPO_ROOT)))
+    summary_path = write_summary(summaries, REPO_ROOT / args.output_dir, master_seed)
+    try:
+        display_path = summary_path.relative_to(REPO_ROOT)
+    except ValueError:
+        display_path = summary_path
+    print("\nSummary written to {0}".format(display_path))
 
     overall_wins = sum(s.tally()["wins"] for s in summaries)
     overall_total = sum(len(s.games) for s in summaries) or 1
-    print("Overall: {0}/{1} wins ({2:.0f}%)".format(
-        overall_wins, overall_total, 100.0 * overall_wins / overall_total))
+    print(
+        "Overall: {0}/{1} wins ({2:.0f}%)".format(
+            overall_wins, overall_total, 100.0 * overall_wins / overall_total
+        )
+    )
     return 0
 
 

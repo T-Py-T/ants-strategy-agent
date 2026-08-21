@@ -1,4 +1,4 @@
-# Docker ignore file for AntsAIBot
+# Docker ignore file for ants-strategy-agent
 # Excludes unnecessary files from Docker build context
 
 # Git

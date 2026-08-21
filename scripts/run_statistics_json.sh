@@ -1,5 +1,5 @@
 #!/bin/bash
-# Statistics script for AntsAIBot using JSON output
+# Statistics script for ants-strategy-agent using JSON output
 # Runs multiple games and shows only final statistics
 
 set -e
@@ -28,7 +28,7 @@ fi
 # Create log directory if it doesn't exist
 mkdir -p "$LOG_DIR"
 
-echo -e "${BLUE}AntsAIBot Statistics Runner (JSON)${NC}"
+echo -e "${BLUE}ants-strategy-agent statistics runner (JSON)${NC}"
 echo "====================================="
 echo "Timestamp: $TIMESTAMP"
 echo "Games per test: $GAMES_PER_TEST"

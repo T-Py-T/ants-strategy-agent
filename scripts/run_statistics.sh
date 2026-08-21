@@ -1,5 +1,5 @@
 #!/bin/bash
-# Statistics script for AntsAIBot
+# Statistics script for ants-strategy-agent
 # Runs multiple games and shows only final statistics
 
 set -e
@@ -21,7 +21,7 @@ TURNS_PER_GAME=${TURNS_PER_GAME:-1000}
 # Create log directory if it doesn't exist
 mkdir -p "$LOG_DIR"
 
-echo -e "${BLUE}AntsAIBot Statistics Runner${NC}"
+echo -e "${BLUE}ants-strategy-agent statistics runner${NC}"
 echo "=============================="
 echo "Timestamp: $TIMESTAMP"
 echo "Games per test: $GAMES_PER_TEST"
@@ -133,7 +133,7 @@ run_statistics() {
 }
 
 # Initialize statistics file
-echo "AntsAIBot Statistics Report - $TIMESTAMP" > "$STATS_FILE"
+echo "ants-strategy-agent statistics report - $TIMESTAMP" > "$STATS_FILE"
 echo "=======================================" >> "$STATS_FILE"
 echo "" >> "$STATS_FILE"
 

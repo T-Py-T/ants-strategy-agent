@@ -1,4 +1,4 @@
-"""Shared pytest fixtures and path setup for the AntsAIBot test suite."""
+"""Shared pytest fixtures and path setup for ants-strategy-agent tests."""
 
 from __future__ import annotations
 

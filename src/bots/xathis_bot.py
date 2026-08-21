@@ -1,16 +1,16 @@
 #!/usr/bin/env python
-"""XathisBot — a Python port of the AI Challenge 2011 winning bot.
+"""Incomplete Python reimplementation of the 2011 winning Xathis bot.
 
 The original is in ``docs/reference/xathis/Strategy.java`` (1,773 lines) and
 the postmortem is at ``docs/reference/xathis/postmortem.txt``.
 
-This is V1: scaffolding only. It puts the full data model in place
-(``Tile`` / ``Ant`` / torus geometry / combat distances) and the empty
-phase ladder from ``Strategy.actions()``. Every phase is a stub that
-returns immediately; the bot falls back to a trivial "all ants stay
-put" behaviour so it never crashes the engine.
+The data model, phase ladder, and several strategy phases have been adapted,
+but multiple phases remain stubs and combat uses a simplified bounded search.
+The implementation is playable and tested for its implemented behavior; it has
+not been validated as strategically faithful or equivalent in strength to the
+preserved Java bot.
 
-Subsequent commits fill in one phase at a time, in this order:
+The phase ladder follows this order:
 
     initTurn        bookkeeping, dangered/willStay flags, gammaDistEnemies
     food            multi-source BFS from food tiles
@@ -287,10 +287,7 @@ class Mission:
 # XathisBot
 # ---------------------------------------------------------------------------
 class XathisBot:
-    """Faithful Python port of xathis's AI Challenge 2011 winning bot.
-
-    Used as the "final boss" opponent for AdvancedBot and future
-    ML-driven variants in this repo.
+    """Partial Python reimplementation of the 2011 Xathis bot.
 
     The phase ladder in ``do_turn`` mirrors ``Strategy.actions()``
     (Strategy.java:203). Each phase is one method on this class; phases

@@ -32,7 +32,7 @@ def devcontainer() -> dict:
 
 
 def test_devcontainer_parses(devcontainer: dict) -> None:
-    assert devcontainer["name"] == "AntsAIBot Development"
+    assert devcontainer["name"] == "ants-strategy-agent development"
     assert devcontainer["workspaceFolder"] == "/app"
 
 
@@ -51,9 +51,9 @@ def test_no_deprecated_python_extension_keys(devcontainer: dict) -> None:
 
 def test_modern_lint_and_format_settings_present(devcontainer: dict) -> None:
     settings = devcontainer["customizations"]["vscode"]["settings"]
-    assert settings.get("pylint.enabled") is True, (
-        "modern `pylint.enabled` (from ms-python.pylint) should be true"
-    )
+    assert (
+        settings.get("pylint.enabled") is True
+    ), "modern `pylint.enabled` (from ms-python.pylint) should be true"
     python_lang = settings.get("[python]")
     assert isinstance(python_lang, dict), "missing `[python]` language block"
     assert python_lang.get("editor.defaultFormatter") == "ms-python.black-formatter"
@@ -70,8 +70,7 @@ def test_post_create_command_uses_uv(devcontainer: dict) -> None:
 def test_python_interpreter_points_to_uv_venv(devcontainer: dict) -> None:
     settings = devcontainer["customizations"]["vscode"]["settings"]
     assert (
-        settings["python.defaultInterpreterPath"]
-        == "/app/.venv/bin/python"
+        settings["python.defaultInterpreterPath"] == "/app/.venv/bin/python"
     ), "interpreter path should resolve to the uv-managed venv"
 
 

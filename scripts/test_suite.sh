@@ -1,5 +1,5 @@
 #!/bin/bash
-# full test suite for AntsAIBot
+# full test suite for ants-strategy-agent
 # Runs multiple test scenarios and generates a report
 
 set -e
@@ -19,13 +19,13 @@ TIMESTAMP=$(date +"%Y-%m-%d_%H-%M-%S")
 # Create log directory if it doesn't exist
 mkdir -p "$LOG_DIR"
 
-echo -e "${BLUE}AntsAIBot Test Suite${NC}"
+echo -e "${BLUE}ants-strategy-agent test suite${NC}"
 echo "====================="
 echo "Timestamp: $TIMESTAMP"
 echo ""
 
 # Initialize report
-echo "AntsAIBot Test Report - $TIMESTAMP" > "$REPORT_FILE"
+echo "ants-strategy-agent test report - $TIMESTAMP" > "$REPORT_FILE"
 echo "=================================" >> "$REPORT_FILE"
 echo "" >> "$REPORT_FILE"
 

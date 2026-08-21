@@ -11,7 +11,7 @@ resolution-markers = [
 ]
 
 [[package]]
-name = "antsaibot"
+name = "ants-strategy-agent"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [
@@ -42,7 +42,7 @@ test = [
 
 [package.metadata]
 requires-dist = [
-    { name = "antsaibot", extras = ["test", "analysis"], marker = "extra == 'dev'" },
+    { name = "ants-strategy-agent", extras = ["test", "analysis"], marker = "extra == 'dev'" },
     { name = "colorama", specifier = ">=0.4.6" },
     { name = "matplotlib", marker = "extra == 'analysis'", specifier = ">=3.11.0" },
     { name = "numpy", marker = "extra == 'analysis'", specifier = ">=2.5.0" },

@@ -1,5 +1,5 @@
 #!/bin/bash
-# Docker-based testing script for AntsAIBot
+# Docker-based testing script for ants-strategy-agent
 # Provides consistent testing environment across different systems
 
 set -e
@@ -12,15 +12,15 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 # Configuration
-IMAGE_NAME="antsaibot"
-CONTAINER_NAME="antsaibot-test"
+IMAGE_NAME="ants-strategy-agent"
+CONTAINER_NAME="ants-strategy-agent-test"
 LOG_DIR="game_logs"
 
 # Resolve which container engine to use. Prefer podman when present,
 # otherwise docker. Override by exporting CONTAINER_ENGINE=docker.
 ENGINE="${CONTAINER_ENGINE:-$(command -v podman >/dev/null 2>&1 && echo podman || echo docker)}"
 
-echo -e "${BLUE}AntsAIBot Docker Testing${NC}"
+echo -e "${BLUE}ants-strategy-agent Docker testing${NC}"
 echo "========================="
 echo ""
 

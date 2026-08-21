@@ -1,11 +1,13 @@
-# AntsAIBot Testing Makefile
+# ants-strategy-agent testing Makefile
 # Provides easy commands for testing your bot against various opponents
+
+SEED ?= 42
 
 .PHONY: help install install-uv pytest pytest-quick pytest-coverage test test-quick test-full test-against-samples test-against-random test-against-hunter test-against-greedy test-against-lefty test-vs-xathis test-self test-visualize benchmark benchmark-quick benchmark-xathis clean docker-build docker-test docker-run stats stats-json stats-parallel
 
 # Default target
 help:
-	@echo "AntsAIBot Testing Commands:"
+	@echo "ants-strategy-agent testing commands:"
 	@echo ""
 	@echo "Setup:"
 	@echo "  install          Install all Python dependencies (prefers uv, falls back to pip)"
@@ -28,7 +30,7 @@ help:
 	@echo "  test-against-hunter   Test against HunterBot"
 	@echo "  test-against-greedy   Test against GreedyBot"
 	@echo "  test-against-lefty    Test against LeftyBot"
-	@echo "  test-vs-xathis        Test against XathisBot (ported AI Challenge 2011 winner)"
+	@echo "  test-vs-xathis        Test against the partial Xathis reimplementation"
 	@echo ""
 	@echo "Statistical Analysis:"
 	@echo "  stats            Run statistical analysis (default: 10 games, 1000 turns)"
@@ -105,22 +107,22 @@ CONTAINER_ENGINE ?= $(shell command -v podman >/dev/null 2>&1 && echo podman || 
 
 # Build container image
 docker-build:
-	$(CONTAINER_ENGINE) build -t antsaibot .
+	$(CONTAINER_ENGINE) build -t ants-strategy-agent .
 
 # Run tests in a container
 docker-test:
-	$(CONTAINER_ENGINE) run --rm -v $(PWD)/game_logs:/app/game_logs antsaibot make test
+	$(CONTAINER_ENGINE) run --rm -v $(PWD)/game_logs:/app/game_logs ants-strategy-agent make test
 
 # Run interactive container
 docker-run:
-	$(CONTAINER_ENGINE) run -it --rm -v $(PWD):/app -w /app antsaibot /bin/bash
+	$(CONTAINER_ENGINE) run -it --rm -v $(PWD):/app -w /app ants-strategy-agent /bin/bash
 
 # Quick test (30 turns, 2 players)
 test:
 	@echo "Running quick test (30 turns, 2 players)..."
 	PYTHONPATH=. python3 src/tools/playgame.py \
-		--engine_seed 42 \
-		--player_seed 42 \
+		--engine_seed $(SEED) \
+		--player_seed $(SEED) \
 		--end_wait=0.25 \
 		--verbose \
 		--log_dir game_logs \
@@ -259,14 +261,14 @@ test-against-greedy:
 		"python3 src/bots/bot.py" \
 		"python3 src/sample_bots/python/GreedyBot.py"
 
-# Test against XathisBot — the "final boss". This is the Python port of
-# Christoph Pacher's AI Challenge 2011 winner ("xathis"), built into this
-# repo as the ground-truth scripted opponent. If your bot can hold its
-# own here, it's competitive at the world-class level.
+# Test against the partial Python reimplementation of Xathis. The preserved
+# winning Java source is under docs/reference/xathis/; this opponent is not
+# validated as strategically equivalent to it.
 test-vs-xathis:
-	@echo "Testing vs XathisBot (ported AI Challenge 2011 winner)..."
+	@echo "Testing vs the partial Xathis reimplementation..."
 	PYTHONPATH=. python3 src/tools/playgame.py \
-		--player_seed 42 \
+		--engine_seed $(SEED) \
+		--player_seed $(SEED) \
 		--end_wait=0.25 \
 		--verbose \
 		--log_dir game_logs \
@@ -539,20 +541,19 @@ analyze:
 # stable RESULT line emitted by playgame.py.
 benchmark:
 	@echo "Running benchmark suite (5 games / matchup, 1000-turn cap)..."
-	@python3 scripts/benchmark.py
+	@python3 scripts/benchmark.py --seed $(SEED)
 
 # Fast smoke-benchmark — 2 games per matchup, 200-turn cap (~30s total).
 # Useful in CI / sanity checks.
 benchmark-quick:
 	@echo "Running quick benchmark (2 games / matchup, 200-turn cap)..."
-	@python3 scripts/benchmark.py --quick
+	@python3 scripts/benchmark.py --quick --seed $(SEED)
 
-# Run the benchmark suite using XathisBot as the bot under test. Useful
-# for measuring xathis_bot's own absolute strength against the sample
-# bots (and as a regression gate when refactoring its phases).
+# Run the benchmark suite using the partial Xathis reimplementation as the bot
+# under test, providing a regression baseline for its implemented phases.
 benchmark-xathis:
 	@echo "Running benchmark with XathisBot as the bot under test..."
-	@python3 scripts/benchmark.py --bot src/bots/xathis_bot.py
+	@python3 scripts/benchmark.py --bot src/bots/xathis_bot.py --seed $(SEED)
 
 # Validate raw against fast output
 validate:

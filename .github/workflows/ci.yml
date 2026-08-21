@@ -77,9 +77,9 @@ jobs:
         with:
           context: .
           load: true
-          tags: antsaibot:ci
+          tags: ants-strategy-agent:ci
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
       - name: Run make test inside container
-        run: docker run --rm antsaibot:ci make test
+        run: docker run --rm ants-strategy-agent:ci make test

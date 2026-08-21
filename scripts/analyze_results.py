@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Advanced Analysis Tool for AntsAIBot Results
+Advanced analysis tool for ants-strategy-agent results
 Loads all game results into memory for fast analysis and validation
 """
 
@@ -325,7 +325,11 @@ class AntsAIAnalyzer:
         # Set up the plotting style
         plt.style.use("seaborn-v0_8")
         fig, axes = plt.subplots(2, 2, figsize=(15, 12))
-        fig.suptitle("AntsAIBot Performance Analysis", fontsize=16, fontweight="bold")
+        fig.suptitle(
+            "ants-strategy-agent performance analysis",
+            fontsize=16,
+            fontweight="bold",
+        )
 
         # 1. Win Rate by Opponent
         win_rates = self.game_data.groupby("test_name")["result"].apply(
@@ -392,7 +396,9 @@ class AntsAIAnalyzer:
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Advanced AntsAIBot Results Analysis")
+    parser = argparse.ArgumentParser(
+        description="Advanced ants-strategy-agent results analysis"
+    )
     parser.add_argument(
         "--file",
         "-f",

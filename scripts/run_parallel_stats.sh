@@ -1,5 +1,5 @@
 #!/bin/bash
-# Parallel statistics script for AntsAIBot
+# Parallel statistics script for ants-strategy-agent
 # Runs hundreds of games in parallel for fast statistical analysis
 
 set -e
@@ -22,7 +22,7 @@ MAX_PARALLEL=${MAX_PARALLEL:-10}  # Maximum parallel games
 # Create log directory if it doesn't exist
 mkdir -p "$LOG_DIR"
 
-echo -e "${BLUE}AntsAIBot Parallel Statistics Runner${NC}"
+echo -e "${BLUE}ants-strategy-agent parallel statistics runner${NC}"
 echo "======================================="
 echo "Timestamp: $TIMESTAMP"
 echo "Games per test: $GAMES_PER_TEST"

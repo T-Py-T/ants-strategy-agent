@@ -1,11 +1,11 @@
 {
-    "name": "AntsAIBot Development",
+    "name": "ants-strategy-agent development",
     "build": {
         "dockerfile": "../Dockerfile",
         "context": ".."
     },
     "runArgs": [
-        "--name=antsaibot-devcontainer"
+        "--name=ants-strategy-agent-devcontainer"
     ],
     "features": {
         "ghcr.io/devcontainers/features/git:1": {},
