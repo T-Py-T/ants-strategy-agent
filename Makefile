@@ -3,7 +3,7 @@
 
 SEED ?= 42
 
-.PHONY: help install install-uv pytest pytest-quick pytest-coverage test test-quick test-full test-against-samples test-against-random test-against-hunter test-against-greedy test-against-lefty test-vs-xathis test-self test-visualize visualize-evidence visualize-latest benchmark benchmark-quick benchmark-xathis clean docker-build docker-test docker-run stats stats-json stats-parallel
+.PHONY: help install install-uv pytest pytest-quick pytest-coverage test test-quick test-full test-against-samples test-against-random test-against-hunter test-against-greedy test-against-lefty test-vs-xathis test-influence test-influence-vs-current test-influence-vs-xathis test-self test-visualize visualize-evidence visualize-latest benchmark benchmark-quick benchmark-xathis benchmark-influence clean docker-build docker-test docker-run stats stats-json stats-parallel
 
 # Default target
 help:
@@ -31,6 +31,9 @@ help:
 	@echo "  test-against-greedy   Test against GreedyBot"
 	@echo "  test-against-lefty    Test against LeftyBot"
 	@echo "  test-vs-xathis        Test against the partial Xathis reimplementation"
+	@echo "  test-influence        Test the recovered InfluenceBot against RandomBot"
+	@echo "  test-influence-vs-current  Compare InfluenceBot with the current default"
+	@echo "  test-influence-vs-xathis   Compare InfluenceBot with partial Xathis"
 	@echo ""
 	@echo "Statistical Analysis:"
 	@echo "  stats            Run statistical analysis (default: 10 games, 1000 turns)"
@@ -276,6 +279,48 @@ test-vs-xathis:
 		--turns 1000 \
 		--map_file maps/maze/maze_02p_01.map \
 		"python3 src/bots/bot.py" \
+		"python3 src/bots/xathis_bot.py"
+
+# Recovered influence-map baseline. The original strategy is credited in the
+# module and docs/STRATEGY_LINEAGE.md; these targets exercise its current
+# protocol adapter without changing the default bot.
+test-influence:
+	@echo "Testing recovered InfluenceBot against RandomBot..."
+	PYTHONPATH=. python3 src/tools/playgame.py \
+		--engine_seed $(SEED) \
+		--player_seed $(SEED) \
+		--end_wait=0.25 \
+		--verbose \
+		--log_dir game_logs \
+		--turns 1000 \
+		--map_file maps/maze/maze_02p_01.map \
+		"python3 src/bots/influence_bot.py" \
+		"python3 src/sample_bots/python/RandomBot.py"
+
+test-influence-vs-current:
+	@echo "Testing recovered InfluenceBot against the current AdvancedBot..."
+	PYTHONPATH=. python3 src/tools/playgame.py \
+		--engine_seed $(SEED) \
+		--player_seed $(SEED) \
+		--end_wait=0.25 \
+		--verbose \
+		--log_dir game_logs \
+		--turns 1000 \
+		--map_file maps/maze/maze_02p_01.map \
+		"python3 src/bots/influence_bot.py" \
+		"python3 src/bots/bot.py"
+
+test-influence-vs-xathis:
+	@echo "Testing recovered InfluenceBot against partial Xathis..."
+	PYTHONPATH=. python3 src/tools/playgame.py \
+		--engine_seed $(SEED) \
+		--player_seed $(SEED) \
+		--end_wait=0.25 \
+		--verbose \
+		--log_dir game_logs \
+		--turns 1000 \
+		--map_file maps/maze/maze_02p_01.map \
+		"python3 src/bots/influence_bot.py" \
 		"python3 src/bots/xathis_bot.py"
 
 # Test against LeftyBot
@@ -561,6 +606,11 @@ benchmark-quick:
 benchmark-xathis:
 	@echo "Running benchmark with XathisBot as the bot under test..."
 	@python3 scripts/benchmark.py --bot src/bots/xathis_bot.py --seed $(SEED)
+
+# Repeated local comparison for the recovered influence-map baseline.
+benchmark-influence:
+	@echo "Running benchmark with InfluenceBot as the bot under test..."
+	@python3 scripts/benchmark.py --bot src/bots/influence_bot.py --seed $(SEED)
 
 # Validate raw against fast output
 validate:

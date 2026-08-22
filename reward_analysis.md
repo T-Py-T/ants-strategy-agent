@@ -1,9 +1,10 @@
 # Reward Function Analysis for Ants AI Challenge
 
-## Current Rule-Based Strategy Analysis
+## Current Default Rule-Based Strategy Analysis
 
 ### Implicit Reward Structure
-Our current bot implements an implicit reward function through its priority system:
+The current default `AdvancedBot` implements an implicit reward function through
+its priority system:
 
 1. **Hill Return Priority** (Highest): Return to hill when ≤20 ants
 2. **Food Collection Priority**: Hunt food within 30-50 tile radius
