@@ -8,7 +8,7 @@ repos:
         pass_filenames: false
       - id: pytest
         name: pytest
-        entry: uv run pytest -q
+        entry: uv run --all-extras pytest -q
         language: system
         pass_filenames: false
         always_run: true

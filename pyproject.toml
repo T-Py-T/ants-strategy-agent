@@ -4,10 +4,26 @@ version = "0.1.0"
 description = "Deterministic Ants strategy agent with a local engine and evaluation harness"
 readme = "README.md"
 requires-python = ">=3.12"
+authors = [
+    { name = "Taylor (T-Py-T)" },
+]
+keywords = [
+    "algorithms",
+    "benchmarking",
+    "evaluation",
+    "game-ai",
+    "multi-agent-systems",
+    "simulation",
+]
 
 dependencies = [
     "colorama>=0.4.6",
 ]
+
+[project.urls]
+Homepage = "https://github.com/T-Py-T/ants-strategy-agent"
+Repository = "https://github.com/T-Py-T/ants-strategy-agent"
+Issues = "https://github.com/T-Py-T/ants-strategy-agent/issues"
 
 [project.optional-dependencies]
 test = [
@@ -25,9 +41,6 @@ dev = [
     "ants-strategy-agent[test,analysis]",
     "pre-commit>=4.3.0",
 ]
-
-[tool.uv]
-# Add UV-specific configuration here if needed
 
 [build-system]
 requires = ["setuptools>=68", "wheel"]
