@@ -49,7 +49,7 @@ help:
 	@echo ""
 	@echo "Visualization:"
 	@echo "  test-visualize   Run test with live visualization"
-	@echo "  visualize-evidence Open the retained portfolio evidence replay"
+	@echo "  visualize-evidence Open the retained sample replay"
 	@echo "  visualize-latest Visualize the most recent game replay"
 	@echo ""
 	@echo "Docker:"

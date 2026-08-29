@@ -1,134 +1,15 @@
-# ants-strategy-agent
+# Ants Strategy Agent
 
-A deterministic multi-agent strategy system for the 2011 Ants AI Challenge,
-packaged with a local game engine, reference opponents, replay visualization,
-benchmark tooling, and PR-gated tests.
+A deterministic strategy bot and local development environment for the 2011
+[Ants AI Challenge](https://ants.aichallenge.org/). The repository includes a
+game engine, several bot implementations, fixed opponents, repeatable match
+runners, benchmark tooling, and a browser replay viewer.
 
-The engineering focus is the evaluation loop around the bot: run repeatable
-matches, inspect replays, compare strategies against fixed opponents, and keep
-the engine/protocol boundary covered by tests.
+![Replay viewer showing the map, fog of war, ant colonies, score history, and turn controls](docs/assets/replay-current-evidence.png)
 
-**Current evidence boundary:** the public artifacts demonstrate a reproducible
-game-agent evaluation platform, not a leaderboard-strength or reinforcement-
-learning result. The historical Xathis Java bot is the fixed competitive
-benchmark for future reinforcement-learning attempts. Each trained policy will
-be scored against it across frozen maps, seeds, turn limits, and outcome metrics
-before any comparative-performance claim is made.
+## Quick start
 
-![The retained deterministic replay rendered in the local visualizer, showing
-four ant colonies, fog of war, score history, and turn controls. This image
-demonstrates the replay path rather than a competitive result.](docs/assets/replay-current-evidence.png)
-
-*Retained deterministic replay at turn 2/200. It demonstrates the working
-map, fog-of-war, ant, score-history, and playback surfaces—not a win claim.*
-
-## At a glance
-
-| Area | Public evidence | Signal |
-| --- | --- | --- |
-| Strategy implementations | [`src/bots/bot.py`](src/bots/bot.py), [`src/bots/influence_bot.py`](src/bots/influence_bot.py) | Current hierarchical policy beside an attributed, recovered influence-map baseline |
-| Game runtime | [`src/ants/`](src/ants), [`src/tools/playgame.py`](src/tools/playgame.py) | Local engine, sandboxing, protocol parsing, and match orchestration |
-| Evaluation | [`Makefile`](Makefile), [`scripts/benchmark.py`](scripts/benchmark.py) | Named head-to-head, probabilistic, and benchmark entry points |
-| Regression protection | [`tests/`](tests), [PR workflow](.github/workflows/ci.yml) | Unit, protocol, engine, sample-bot, Docker, and real-game checks |
-| Qualitative debugging | [`visualizer/`](visualizer) | Browser replay inspection for behavior and failure analysis |
-| Historical comparison | [`src/bots/xathis_bot.py`](src/bots/xathis_bot.py), [`docs/reference/xathis/`](docs/reference/xathis) | Partial Python reimplementation beside the preserved winning Java source |
-| Provenance | [`docs/LICENSING.md`](docs/LICENSING.md), [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md) | Apache-2.0 project boundary with explicit historical-source exceptions |
-
-## System design
-
-```text
-map + game state
-       │
-       ▼
-priority policy
-  1. continue valid standing orders
-  2. protect colony growth
-  3. target enemy hills
-  4. collect food
-  5. engage when advantageous
-  6. explore unseen space
-       │
-       ▼
-collision-safe orders ──► engine / sandbox ──► replay + result artifacts
-                                      │
-                                      └──────► benchmark aggregation
-```
-
-The diagram describes the current default `AdvancedBot`. The independently
-invocable `InfluenceBot` uses propagated heat maps for food, fog-of-war edges,
-combat safety, hill defense, and coordinated waves. Its historical class name
-is `IForOneWelcomeOurNewInsectOverlords`; the descriptive alias makes its role
-clear without erasing the source identity. See
-[`docs/STRATEGY_LINEAGE.md`](docs/STRATEGY_LINEAGE.md) for the exact lineage,
-attribution, and evaluation boundary.
-
-The implemented bots are rule-based agents, not trained language models or
-reinforcement-learning policies. Future RL work is a separate model track: it
-will train policy variants from state/action/reward trajectories and evaluate
-them against frozen algorithmic baselines. No model-performance claim is made
-until those runs and their artifacts exist.
-
-## Evaluation contract
-
-The project supports three useful levels of evidence:
-
-1. `make pytest` checks deterministic components and structural contracts.
-2. `make test` runs a real 30-turn game through the local engine.
-3. Benchmark targets run repeated matches against named reference opponents and
-   emit machine-readable results for analysis.
-
-```bash
-make pytest
-make test
-make test-vs-xathis
-make benchmark-xathis
-make test-influence-vs-current
-make test-influence-vs-xathis
-make benchmark-influence
-```
-
-Reproducing an engine run requires two independent values. `engine_seed`
-controls engine-side randomness such as food generation; `player_seed` is sent
-to each bot so opponents with randomized policies can reproduce their choices.
-The showcased Make targets default to `SEED=42`: game targets pass it as both
-values, while the benchmark runner uses it as a recorded master seed from which
-it derives and records an engine/player seed pair for every game. Override it
-with a command such as `make benchmark SEED=73`. The same code revision, map,
-arguments, bot revisions, and both per-game seeds are required for a repeatable
-comparison. Wall-clock timeouts and runtime differences remain external
-sources of variation.
-
-[`statistics.json`](statistics.json) and
-[`parallel_statistics.json`](parallel_statistics.json) are retained historical
-runs, not a current leaderboard. They were produced at different times and do
-not establish a general win-rate claim. A publishable comparison should record
-the code revision, map set, seeds, turn limit, opponent revision, raw results,
-and aggregation command in the same evidence bundle.
-
-### Current retained evidence
-
-[`results/current-evidence-v1/`](results/current-evidence-v1/) is the first
-current-SHA packet. Its fixed 14-game workload completed with zero engine errors
-and 14 draws. The value of this small packet is the traceable
-benchmark-to-replay path, not strategic-performance evidence.
-
-| Question | Exact artifact |
-| --- | --- |
-| What ran? | [`benchmarks/current-evidence-v1.json`](benchmarks/current-evidence-v1.json) |
-| What happened in every game? | [`results/current-evidence-v1/deterministic-result.json`](results/current-evidence-v1/deterministic-result.json) |
-| What did the runner emit? | [`results/current-evidence-v1/benchmark-raw.json`](results/current-evidence-v1/benchmark-raw.json) |
-| Can I inspect a game? | [`results/current-evidence-v1/replay/four-player-final.replay`](results/current-evidence-v1/replay/four-player-final.replay) |
-| Are the files intact? | [`results/current-evidence-v1/manifest.json`](results/current-evidence-v1/manifest.json) |
-| What does it prove? | [`results/current-evidence-v1/README.md`](results/current-evidence-v1/README.md) |
-
-The packet is tied to default-branch commit `69bc75d6e6bb26c5f68ca02432bf313aae4aa2b2`,
-one master seed, two games per matchup, and a 200-turn cap. It is a deterministic
-regression sample, not a statistically significant win-rate estimate or a
-universal strategy claim.
-
-## Local setup
-
-The canonical environment uses [`uv`](https://docs.astral.sh/uv/):
+The project uses [uv](https://docs.astral.sh/uv/) to manage Python dependencies.
 
 ```bash
 git clone https://github.com/T-Py-T/ants-strategy-agent.git
@@ -140,84 +21,155 @@ make test
 make visualize-evidence
 ```
 
-`make visualize-evidence` opens the retained current-SHA replay with the map,
-ants, score history, and turn controls. `make visualize-latest` instead opens
-the newest replay produced under `game_logs/` during local development.
+`make test` runs a short game through the local engine. The visualization
+command opens the retained replay shown above, including fog of war, score
+history, playback controls, and the full map state.
 
-Contributor commit-gate setup and validation commands are maintained in
-[`CONTRIBUTING.md`](CONTRIBUTING.md).
-
-Optional dependency groups are explicit so a contributor can install only the
-surface being exercised:
-
-| Extra | Contents | Use |
-| --- | --- | --- |
-| `[test]` | pytest and coverage support | Unit and integration regression checks |
-| `[analysis]` | pandas, NumPy, SciPy, Matplotlib, and Seaborn | Benchmark aggregation and plots |
-| `[dev]` | Both groups plus pre-commit | Complete contributor environment |
-
-Docker and a VS Code dev container are available when a host-local Python/Java
-toolchain is undesirable:
+Docker and a VS Code dev container are also available:
 
 ```bash
 make docker-build
 make docker-test
 ```
 
-The hosted workflow is intentionally a pull-request merge gate. See
-[`CONTRIBUTING.md`](CONTRIBUTING.md) for the local-validation and branch
-workflow.
+Optional dependency groups let you install only the tools you need:
+
+| Extra | Includes | Use |
+| --- | --- | --- |
+| `[test]` | pytest and coverage support | Unit and integration tests |
+| `[analysis]` | pandas, NumPy, SciPy, Matplotlib, and Seaborn | Benchmark analysis and plots |
+| `[dev]` | Test and analysis dependencies plus pre-commit | Complete contributor environment |
+
+## How the bot works
+
+The default `AdvancedBot` chooses one action for each available ant using a
+priority-based policy:
+
+```text
+game state
+    │
+    ▼
+continue valid standing orders
+    │
+    ▼
+protect colony growth
+    │
+    ▼
+attack enemy hills / collect food / engage / explore
+    │
+    ▼
+collision-safe orders
+    │
+    ├──► local engine and sandbox
+    └──► replay and match result
+```
+
+The policy tracks previously issued orders, food targets, enemy hills,
+exploration state, and planned destinations. Movement is resolved before
+orders are emitted so multiple ants do not choose the same square.
+
+The repository also contains `InfluenceBot`, whose historical class name is
+`IForOneWelcomeOurNewInsectOverlords`. It uses influence maps for food,
+unexplored territory, combat safety, defense, and coordinated movement. See
+[docs/STRATEGY_LINEAGE.md](docs/STRATEGY_LINEAGE.md) for its origin and the
+adaptations made for the current engine.
+
+## Bots
+
+| Bot | File | Purpose |
+| --- | --- | --- |
+| `AdvancedBot` | [`src/bots/bot.py`](src/bots/bot.py) | Current default hierarchical strategy |
+| `InfluenceBot` | [`src/bots/influence_bot.py`](src/bots/influence_bot.py) | Recovered influence-map strategy adapted to the current protocol |
+| `XathisBot` | [`src/bots/xathis_bot.py`](src/bots/xathis_bot.py) | Partial Python adaptation used as an algorithmic comparison target |
+| Sample opponents | [`src/sample_bots/`](src/sample_bots) | Random, greedy, hunter, lefty, and other fixed baselines |
+
+The preserved Java Xathis source is under
+[`docs/reference/xathis/`](docs/reference/xathis). Xathis is the comparison
+target for future reinforcement-learning experiments; it is not the default
+bot used by the project.
+
+## Replays and benchmarks
+
+Run individual matchups:
+
+```bash
+make test-against-random
+make test-against-hunter
+make test-vs-xathis
+make test-influence-vs-current
+make test-influence-vs-xathis
+```
+
+Run the benchmark suite or its shorter smoke configuration:
+
+```bash
+make benchmark SEED=42
+make benchmark-quick SEED=42
+make benchmark-influence SEED=42
+```
+
+The engine and each bot receive recorded seeds. Repeating a result requires the
+same code revision, map, arguments, bot revisions, engine seed, and player seed.
+
+The versioned sample under
+[`results/current-evidence-v1/`](results/current-evidence-v1/) contains:
+
+- the benchmark configuration;
+- machine-readable aggregate and per-game results;
+- raw runner output;
+- a replay that opens in the bundled viewer; and
+- a manifest covering the retained files.
+
+Open the newest locally generated replay with:
+
+```bash
+make visualize-latest
+```
+
+## Validation
+
+```bash
+make pytest
+make test
+make validate
+```
+
+The test suite covers strategy utilities, protocol parsing, engine behavior,
+sandboxing, sample opponents, benchmark outputs, replay handling, and complete
+game runs. Contributor setup and the local commit gate are described in
+[CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Project Structure
 
 ```
 src/
-├── ants/               # engine, game state, protocol, sandbox
-├── bots/               # current policy, recovered baseline, partial Xathis
-├── sample_bots/        # fixed evaluation opponents in several languages
+├── ants/               # engine, state model, protocol, and sandbox
+├── bots/               # AdvancedBot, InfluenceBot, and Xathis adaptation
+├── sample_bots/        # fixed opponents in several languages
 └── tools/              # match runner and map generation
-tests/                  # deterministic regression suite
-scripts/                # benchmark and analysis entry points
-visualizer/             # replay viewer
-maps/                   # retained evaluation maps
-docs/reference/xathis/  # preserved historical reference source
+tests/                  # unit, integration, and game regressions
+scripts/                # benchmarks and result analysis
+visualizer/             # local browser replay viewer
+maps/                   # bundled challenge maps
+results/                # versioned result packets
+docs/reference/xathis/  # preserved historical Xathis source
 ```
 
-## Scope, licensing, and provenance
+## Reinforcement-learning track
 
-Taylor's work includes the current `AdvancedBot`, the Python integration around
-a partial Xathis adaptation, integration hardening, tests, benchmark/analysis
-tooling, and developer workflow around the challenge. `InfluenceBot` is a recovered,
-attributed strategy originally written by Tim Whitson; Taylor's repository work
-on it is the current-protocol adaptation, characterization, and comparative
-evaluation—not authorship of the underlying algorithm. The repository also
-preserves challenge-engine, sample-opponent, visualizer, and historical Xathis
-reference material so the system can be exercised locally. Those retained
-components are reference and compatibility inputs, not presented as original
-work; see
-[`docs/gitroll-triage.md`](docs/gitroll-triage.md) for the explicit maintenance
-boundary.
+The current bots are algorithmic. The planned reinforcement-learning track
+will train policies from game trajectories and score them against frozen maps,
+seeds, turn limits, and algorithmic opponents—including Xathis—using the same
+match and replay infrastructure.
 
-The preserved Java sources under `docs/reference/xathis/` are the historical
-first-place Xathis bot. `src/bots/xathis_bot.py` is an incomplete Python
-reimplementation that directly adapts Xathis constants, data structures, phase
-ordering, and methods: several strategy phases remain no-ops, and its combat
-search is a simplified, bounded substitute for the original algorithm. Its
-tests show that the implemented pieces and engine integration work; they do not
-establish strategic fidelity or strength equivalent to the winning Java bot.
-Xathis matchups in this repository are therefore regression and comparison
-inputs, not evidence of world-class competitive performance.
+## Licensing and provenance
 
-Taylor's original contributions and the Apache-licensed AI Challenge-derived
-infrastructure are available under the
-[`Apache License 2.0`](LICENSE). The project license does not relicense two
-attributed historical strategy lineages for which no license grant was located:
-the unchanged Xathis Java snapshot, Xathis-derived portions of the Python
-adaptation, and the original portions of Tim Whitson's influence-map bot. Those
-portions remain under their authors' terms and are excluded from the project
-grant; Taylor's independently authored integration work remains Apache-2.0.
+Taylor's original code and the Apache-licensed challenge infrastructure are
+available under [Apache License 2.0](LICENSE). Historical Xathis-derived code
+and Tim Whitson's original influence-map strategy retain their original terms
+and are excluded from the project license where no license grant was found.
 
-Read [`docs/LICENSING.md`](docs/LICENSING.md) for the component inventory and
-[`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md) for exact upstream revisions
-and exceptions. Contributions follow [`CONTRIBUTING.md`](CONTRIBUTING.md), and
-security reports follow [`SECURITY.md`](SECURITY.md).
+See [docs/LICENSING.md](docs/LICENSING.md) and
+[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for the component-by-component
+breakdown. Contributions follow [CONTRIBUTING.md](CONTRIBUTING.md), and security
+reports follow [SECURITY.md](SECURITY.md).
