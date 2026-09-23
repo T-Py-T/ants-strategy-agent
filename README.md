@@ -1,5 +1,7 @@
 # Ants Strategy Agent
 
+[![CI](https://github.com/T-Py-T/ants-strategy-agent/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/T-Py-T/ants-strategy-agent/actions/workflows/ci.yml?query=branch%3Amain)
+
 A deterministic strategy bot and local development environment for the 2011
 [Ants AI Challenge](https://ants.aichallenge.org/). The repository includes a
 game engine, several bot implementations, fixed opponents, repeatable match
