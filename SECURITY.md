@@ -23,3 +23,18 @@ in issues, pull requests, logs, or retained benchmark artifacts.
 This project executes locally supplied bot processes. Treat untrusted bots as
 untrusted code: use a disposable environment, keep networking disabled when
 possible, and do not mount credential-bearing directories into the runtime.
+
+## Documentation status and tip-cites
+
+For provenance, use the tip-cite protocol: cite the first 8 hexadecimal
+characters of the merge commit on `main` together with the PR number, using
+this format:
+
+```text
+T-Py-T/ants-strategy-agent #<PR> <8-char-main-tip>
+```
+
+A tip-cite is not a readiness signal. This document makes no `READY` claim,
+and no `READY` status is asserted or implied by a tip-cite. For the current
+open and held work, see [docs/OPEN_PROBLEMS.md](docs/OPEN_PROBLEMS.md); that
+inventory is the source of those details and is not duplicated here.
