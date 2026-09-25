@@ -30,6 +30,23 @@ Claims should be checked against the same revision, maps, arguments, bot
 revisions, and seeds described by the result packet; this README does not add
 scores or performance claims that are not recorded there.
 
+## Hiring-review path
+
+A hiring reader can verify the engineering signal without treating README prose
+as a performance claim:
+
+| Signal | Start here | What to inspect |
+| --- | --- | --- |
+| Systems ownership | [`src/ants/`](src/ants/) and [`Makefile`](Makefile) | Engine, protocol, sandbox, and repeatable commands |
+| Algorithm design | [`src/bots/`](src/bots/) and [`docs/STRATEGY_LINEAGE.md`](docs/STRATEGY_LINEAGE.md) | Policy boundaries, comparison bots, and stated adaptations |
+| Reproducibility | [`results/current-evidence-v1/`](results/current-evidence-v1/) | Config, seeds, raw output, manifest, and retained replay |
+| Engineering judgment | [`CONTRIBUTING.md`](CONTRIBUTING.md) and [`docs/OPEN_PROBLEMS.md`](docs/OPEN_PROBLEMS.md) | Validation expectations, limitations, and follow-up evidence |
+
+A concise review loop is: run `make pytest`, `make test`, and `make validate`;
+inspect the result manifest; open the retained replay; then read the stated
+limitations. If the revision or match inputs differ, treat the result as new
+evidence rather than silently extending the existing claim.
+
 ## Quick start
 
 The project uses [uv](https://docs.astral.sh/uv/) to manage Python dependencies.
@@ -201,9 +218,13 @@ security reports follow [SECURITY.md](SECURITY.md).
 
 ## Evidence status
 
-> Tip-cite (bank format): T-Py-T/ants-strategy-agent #80 `a06f9709`
-> Tip-cite (bank format): T-Py-T/ants-strategy-agent #82 `7f6d8117`
+> Tip-cite bank: `2799a1c0 #80`
+> Tip-cite bank: `a659d442 #82`
+> Tip-cite bank: `ae2e9d2b #84`
+> Tip-cite bank: `e30472b1 #85`
 
-This documentation-only update makes no `READY` claim. No `READY` status,
-benchmark score, or hiring outcome is asserted here. The Steward resolves the
-short tip against `main` when a full SHA is needed.
+These examples use the first eight hexadecimal characters of each merged
+`main` commit followed by its PR number. This documentation-only update makes
+no `READY` claim. No `READY` status, benchmark score, or hiring outcome is
+asserted here; the Steward resolves a short tip against `main` when a full SHA
+is needed.
