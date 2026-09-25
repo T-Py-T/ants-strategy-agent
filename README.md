@@ -202,6 +202,7 @@ security reports follow [SECURITY.md](SECURITY.md).
 ## Evidence status
 
 > Tip-cite (bank format): T-Py-T/ants-strategy-agent #80 `a06f9709`
+> Tip-cite (bank format): T-Py-T/ants-strategy-agent #82 `7f6d8117`
 
 This documentation-only update makes no `READY` claim. No `READY` status,
 benchmark score, or hiring outcome is asserted here. The Steward resolves the
