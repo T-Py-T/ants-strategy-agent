@@ -194,8 +194,10 @@ and are excluded from the project license where no license grant was found.
 
 See [docs/LICENSING.md](docs/LICENSING.md) and
 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for the component-by-component
-breakdown. Contributions follow [CONTRIBUTING.md](CONTRIBUTING.md), and security
-reports follow [SECURITY.md](SECURITY.md).
+breakdown. Open and held work is tracked in
+[docs/OPEN_PROBLEMS.md](docs/OPEN_PROBLEMS.md); that inventory is not an
+acceptance gate. Contributions follow [CONTRIBUTING.md](CONTRIBUTING.md), and
+security reports follow [SECURITY.md](SECURITY.md).
 
 ## Evidence status
 
