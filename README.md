@@ -9,6 +9,27 @@ runners, benchmark tooling, and a browser replay viewer.
 
 ![Replay viewer showing the map, fog of war, ant colonies, score history, and turn controls](docs/assets/replay-current-evidence.png)
 
+## What this repo proves
+
+For a hiring reader, this repository is an inspectable path from algorithmic code
+to repeatable evidence. It demonstrates that the project can:
+
+- build and maintain match infrastructure: a game engine, protocol handling,
+  sandboxing, seeded runners, and a replay viewer;
+- implement and compare algorithmic bots, including a hierarchical policy,
+  influence-map strategy, an adapted comparison bot, and fixed opponents; and
+- preserve reproducibility and engineering context through versioned configs,
+  raw and machine-readable results, retained replays, manifests, tests, and
+  component-level licensing and provenance notes.
+
+The evidence path is deliberately local: install the documented environment,
+run the validation and matchup commands, inspect
+[`results/current-evidence-v1/`](results/current-evidence-v1/), and open the
+retained replay with `make visualize-evidence` or `make visualize-latest`.
+Claims should be checked against the same revision, maps, arguments, bot
+revisions, and seeds described by the result packet; this README does not add
+scores or performance claims that are not recorded there.
+
 ## Quick start
 
 The project uses [uv](https://docs.astral.sh/uv/) to manage Python dependencies.
@@ -178,8 +199,8 @@ reports follow [SECURITY.md](SECURITY.md).
 
 ## Evidence status
 
-> Tip-cite (bank format): T-Py-T/ants-strategy-agent #79 `06093d7c`
+> Tip-cite (bank format): T-Py-T/ants-strategy-agent #PR TBD `06093d7c`
 
-This documentation-only update makes no `READY` claim and reports no invented
-benchmark metric. The Steward resolves the short tip against `main` when a full
-SHA is needed.
+This documentation-only update makes no `READY` claim. No `READY` status,
+benchmark score, or hiring outcome is asserted here. The Steward resolves the
+short tip against `main` when a full SHA is needed.
