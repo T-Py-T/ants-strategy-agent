@@ -80,7 +80,9 @@ T-Py-T/ants-strategy-agent #<PR> <8-char-merge-tip>
 Use the first eight hexadecimal characters of the **merge commit on `main`**,
 not the branch tip or an unmerged commit. A tip-cite identifies the reviewed
 revision; it does not create a `READY` status or strengthen evidence that was
-not retained.
+not retained. Never treat a merged pull request, passing checks, or a tip-cite
+as a standalone `READY` claim; readiness requires the project’s stated criteria
+and retained evidence.
 
 ## Licensing and provenance
 
