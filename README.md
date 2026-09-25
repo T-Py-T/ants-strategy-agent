@@ -222,9 +222,11 @@ security reports follow [SECURITY.md](SECURITY.md).
 > Tip-cite bank: `a659d442 #82`
 > Tip-cite bank: `ae2e9d2b #84`
 > Tip-cite bank: `e30472b1 #85`
+> Tip-cite bank: `93273f7b #90`
 
 These examples use the first eight hexadecimal characters of each merged
-`main` commit followed by its PR number. This documentation-only update makes
-no `READY` claim. No `READY` status, benchmark score, or hiring outcome is
-asserted here; the Steward resolves a short tip against `main` when a full SHA
-is needed.
+`main` commit followed by its PR number. Use the linked code, checks, and result
+packet as the hiring-review evidence path; README prose is not a hiring
+recommendation. This documentation-only update makes no `READY` claim. No
+`READY` status, benchmark score, or hiring outcome is asserted here; the
+Steward resolves a short tip against `main` when a full SHA is needed.
