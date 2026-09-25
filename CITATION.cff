@@ -1,0 +1,8 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "Ants Strategy Agent"
+type: software
+authors:
+  - name: "Taylor (T-Py-T)"
+    email: "tnt850910@aol.com"
+repository-code: "https://github.com/T-Py-T/ants-strategy-agent"
