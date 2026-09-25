@@ -34,7 +34,10 @@ this format:
 T-Py-T/ants-strategy-agent #<PR> <8-char-main-tip>
 ```
 
-A tip-cite is not a readiness signal. This document makes no `READY` claim,
-and no `READY` status is asserted or implied by a tip-cite. For the current
-open and held work, see [docs/OPEN_PROBLEMS.md](docs/OPEN_PROBLEMS.md); that
-inventory is the source of those details and is not duplicated here.
+A tip-cite is a provenance pointer, not a readiness signal. This security
+policy makes no `READY` claim: security support, a report acknowledgement, or a
+fix or mitigation does not certify release readiness, benchmark quality, or the
+absence of vulnerabilities. No `READY` status is asserted or implied by a
+tip-cite. For the current open and held work, see
+[docs/OPEN_PROBLEMS.md](docs/OPEN_PROBLEMS.md); that inventory is the source of
+those details and is not duplicated here.
