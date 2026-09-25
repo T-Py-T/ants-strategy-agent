@@ -178,7 +178,7 @@ reports follow [SECURITY.md](SECURITY.md).
 
 ## Evidence status
 
-> Tip-cite (bank format): T-Py-T/ants-strategy-agent #PR TBD `06093d7c`
+> Tip-cite (bank format): T-Py-T/ants-strategy-agent #79 `06093d7c`
 
 This documentation-only update makes no `READY` claim and reports no invented
 benchmark metric. The Steward resolves the short tip against `main` when a full
