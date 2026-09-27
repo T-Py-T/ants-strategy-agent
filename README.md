@@ -237,4 +237,6 @@ Steward resolves a short tip against `main` when a full SHA is needed.
 
 ## Keep exploring
 
-Software citation metadata: [`CITATION.cff`](CITATION.cff).
+Software citation metadata: [`CITATION.cff`](CITATION.cff). Review routing:
+[`.github/CODEOWNERS`](.github/CODEOWNERS) assigns ownership; it is not a
+`READY` signal.
