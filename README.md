@@ -239,4 +239,6 @@ Steward resolves a short tip against `main` when a full SHA is needed.
 
 Software citation metadata: [`CITATION.cff`](CITATION.cff). Review routing:
 [`.github/CODEOWNERS`](.github/CODEOWNERS) assigns ownership; it is not a
-`READY` signal.
+`READY` signal. Root license text and SPDX identifier:
+[`LICENSE`](LICENSE); the SPDX line and trailing provenance appendix are not
+part of the license grant.
