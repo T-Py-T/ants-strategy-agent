@@ -48,7 +48,8 @@ limitations. If the revision or match inputs differ, treat the result as new
 evidence rather than silently extending the existing claim. Read
 [`docs/OPEN_PROBLEMS.md`](docs/OPEN_PROBLEMS.md) alongside this path for the
 limitations and held work that bound the hiring evidence; it is an inventory,
-not an acceptance gate.
+not an acceptance gate. Forward-looking scope is tracked in
+[`ROADMAP.md`](ROADMAP.md); it is a planning surface, not an acceptance gate.
 
 ## Quick start
 
