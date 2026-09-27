@@ -1,3 +1,9 @@
+# Documentation status and tip-cites (provenance only; no READY claim).
+# Tip-cite bank: `fa302dbd` #98 (base main at Ship190 remap).
+# Tip-cite bank: this PR pending Steward.
+# Steward resolves the 8-character tip against main when a full SHA or merge
+# context is needed. A tip-cite records provenance; it does not establish
+# readiness, benchmark quality, security, hiring outcome, or any other result.
 cff-version: 1.2.0
 message: "If you use this software, please cite it as below."
 title: "Ants Strategy Agent"

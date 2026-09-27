@@ -234,3 +234,7 @@ packet as the hiring-review evidence path; README prose is not a hiring
 recommendation. This documentation-only update makes no `READY` claim. No
 `READY` status, benchmark score, or hiring outcome is asserted here; the
 Steward resolves a short tip against `main` when a full SHA is needed.
+
+## Keep exploring
+
+Software citation metadata: [`CITATION.cff`](CITATION.cff).
