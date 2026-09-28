@@ -238,7 +238,11 @@ Steward resolves a short tip against `main` when a full SHA is needed.
 ## Keep exploring
 
 Architecture decision index: [`docs/adr/README.md`](docs/adr/README.md) —
-planning records, not implementation proof. Software citation metadata:
+planning records, not implementation proof. Dependency-update scaffold:
+[`.github/dependabot.yml`](.github/dependabot.yml) — automation config, not
+readiness proof; wayfinder
+[#103](https://github.com/T-Py-T/ants-strategy-agent/issues/103). Software
+citation metadata:
 [`CITATION.cff`](CITATION.cff). Review routing:
 [`.github/CODEOWNERS`](.github/CODEOWNERS) assigns ownership; it is not a
 `READY` signal. Root license text and SPDX identifier:

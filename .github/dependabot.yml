@@ -1,0 +1,29 @@
+# tip-cite bank: base main 9b8217ed + this PR pending Steward; provenance only; never READY.
+# Wayfinder: https://github.com/T-Py-T/ants-strategy-agent/issues/103
+#
+# Documentation status and tip-cites
+#
+# This file scaffolds lean dependency-update automation. A tip-cite records
+# provenance; it does not establish readiness, certify dependency hygiene,
+# security posture, or hiring outcome. Enabling Dependabot does not assert that
+# updates are reviewed, merged, or validated against retained evidence.
+#
+# Reversible: delete this file (or replace with renovate.json) to withdraw the
+# scaffold without affecting match infrastructure or evidence packets.
+#
+# Fallback: if Dependabot is unavailable, an equivalent renovate.json may be
+# used; keep the same tip-cite honesty boundary.
+
+version: 2
+updates:
+  - package-ecosystem: pip
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
