@@ -69,6 +69,7 @@ review clarity, not priority commitment.
 | --- | --- | --- |
 | Synchronize README, result packets, manifests, licensing notes, and strategy lineage when claims or scope change | `GAP` | Prevent drift between prose and retained artifacts (see open inventory). |
 | Keep [`CHANGELOG.md`](CHANGELOG.md) tip-cite bank current after merged documentation ships | `GAP` | Compact provenance for hiring readers without inventing release or readiness status. |
+| Lean dependency-update scaffold ([`.github/dependabot.yml`](.github/dependabot.yml); fallback `renovate.json`) | `UNTESTED` | Records automation intent and tip-cite provenance only; Dependabot PRs require the same review bar as manual updates. Wayfinder: [#103](https://github.com/T-Py-T/ants-strategy-agent/issues/103). |
 | Maintain hiring-review path tables and pointers (`ROADMAP`, `OPEN_PROBLEMS`, `CONTRIBUTING`) as thin indexes | — | Planning docs point to evidence; they do not substitute for it. |
 
 ### Licensing and provenance
