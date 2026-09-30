@@ -42,6 +42,8 @@ Routine branch pushes should not be used as a test runner.
 
 ## Pull requests
 
+- Report security vulnerabilities privately per [SECURITY.md](SECURITY.md);
+  do not open a public issue for them.
 - Keep one concern per pull request.
 - Explain the bounded problem, the behavior being changed, and link its
   implementation and evidence.
