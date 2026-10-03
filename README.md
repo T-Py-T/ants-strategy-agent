@@ -5,9 +5,7 @@
 A deterministic strategy bot and local development environment for the 2011
 [Ants AI Challenge](https://ants.aichallenge.org/). The repository includes a
 game engine, several bot implementations, fixed opponents, repeatable match
-runners, benchmark tooling, and a browser replay viewer. For a compact
-hireability index, suggested GitHub topics, and license pointers without
-duplicating this page, see [`docs/HIREABILITY.md`](docs/HIREABILITY.md).
+runners, benchmark tooling, and a browser replay viewer.
 
 ![Replay viewer showing the map, fog of war, ant colonies, score history, and turn controls](docs/assets/replay-current-evidence.png)
 
@@ -239,9 +237,7 @@ Steward resolves a short tip against `main` when a full SHA is needed.
 
 ## Keep exploring
 
-Hireability and topic index: [`docs/HIREABILITY.md`](docs/HIREABILITY.md) —
-purpose, stack, demo commands, [`LICENSE`](LICENSE) pointer, and suggested
-GitHub topics; not a `READY` signal. Architecture decision index:
+Architecture decision index:
 [`docs/adr/README.md`](docs/adr/README.md) —
 planning records, not implementation proof. Dependency-update scaffold:
 [`.github/dependabot.yml`](.github/dependabot.yml) — automation config, not
