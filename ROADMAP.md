@@ -1,6 +1,6 @@
 # Roadmap
 
-This document is a **planning surface** for hireability and engineering follow-up.
+This document is a **planning surface** for engineering follow-up.
 It records intended scope, known gaps, and documentation hygiene — not acceptance,
 readiness, benchmark scores, or hiring outcomes.
 
