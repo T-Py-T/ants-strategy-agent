@@ -1,82 +1,67 @@
+<div align="center">
+
 # Ants Strategy Agent
+
+**Write a colony brain. Drop it on a map. Watch it fight.**
+
+A deterministic strategy bot for the 2011
+[Ants AI Challenge](https://ants.aichallenge.org/), bundled with the local game
+engine, fixed opponents, seeded match runners, and a browser replay viewer, so
+the whole loop runs on your laptop.
 
 [![CI](https://github.com/T-Py-T/ants-strategy-agent/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/T-Py-T/ants-strategy-agent/actions/workflows/ci.yml?query=branch%3Amain)
 
-A deterministic strategy bot and local development environment for the 2011
-[Ants AI Challenge](https://ants.aichallenge.org/). The repository includes a
-game engine, several bot implementations, fixed opponents, repeatable match
-runners, benchmark tooling, and a browser replay viewer.
+[Getting started](#getting-started) ·
+[Demo](#demo-play-a-match-then-replay-one) ·
+[How the bot thinks](#how-the-bot-thinks) ·
+[Benchmarks](#benchmarks-and-the-retained-result-packet) ·
+[Contributing](#contributing)
 
-![Replay viewer showing the map, fog of war, ant colonies, score history, and turn controls](docs/assets/replay-current-evidence.png)
+![Replay viewer: a four-player maze with fog of war, colony hills, score and ant-count history, and playback controls](docs/assets/replay-current-evidence.png)
 
-## What this repo proves
+<sub>A retained four-player game (<code>bot.py</code> vs RandomBot, HunterBot, and GreedyBot), rendered by the bundled viewer.</sub>
 
-For a hiring reader, this repository is an inspectable path from algorithmic code
-to repeatable evidence. It demonstrates that the project can:
+</div>
 
-- build and maintain match infrastructure: a game engine, protocol handling,
-  sandboxing, seeded runners, and a replay viewer;
-- implement and compare algorithmic bots, including a hierarchical policy,
-  influence-map strategy, an adapted comparison bot, and fixed opponents; and
-- preserve reproducibility and engineering context through versioned configs,
-  raw and machine-readable results, retained replays, manifests, tests, and
-  component-level licensing and provenance notes.
+## Why you might like it
 
-The evidence path is deliberately local: install the documented environment,
-run the validation and matchup commands, inspect
-[`results/current-evidence-v1/`](results/current-evidence-v1/), and open the
-retained replay with `make visualize-evidence` or `make visualize-latest`.
-Claims should be checked against the same revision, maps, arguments, bot
-revisions, and seeds described by the result packet; this README does not add
-scores or performance claims that are not recorded there.
+- **The whole arena, offline.** Engine, protocol, sandbox, maps, opponents and
+  viewer live in one repository. No server, no account, no upload.
+- **Seeded and repeatable.** The engine and every bot get recorded seeds, so a
+  match can be replayed from the same revision, map and arguments.
+- **Several brains to compare.** A priority-based default bot, a recovered
+  influence-map bot, a partial Python port of the 2011 winner, and a bench of
+  simple sample opponents.
+- **Replays you can scrub.** Every game writes a `.replay` file that opens in
+  the browser viewer with fog of war, score history and turn controls.
+- **Honest numbers.** Results come from files you can rerun and diff, not from
+  prose in this README.
 
-## Hiring-review path
+## Getting started
 
-A hiring reader can verify the engineering signal without treating README prose
-as a performance claim:
+### Prerequisites
 
-| Signal | Start here | What to inspect |
-| --- | --- | --- |
-| Systems ownership | [`src/ants/`](src/ants/) and [`Makefile`](Makefile) | Engine, protocol, sandbox, and repeatable commands |
-| Algorithm design | [`src/bots/`](src/bots/) and [`docs/STRATEGY_LINEAGE.md`](docs/STRATEGY_LINEAGE.md) | Policy boundaries, comparison bots, and stated adaptations |
-| Reproducibility | [`results/current-evidence-v1/`](results/current-evidence-v1/) | Config, seeds, raw output, manifest, and retained replay |
-| Engineering judgment | [`CONTRIBUTING.md`](CONTRIBUTING.md) and [`docs/OPEN_PROBLEMS.md`](docs/OPEN_PROBLEMS.md) | Validation expectations, limitations, and follow-up evidence |
+- Python 3.12 or newer
+- [uv](https://docs.astral.sh/uv/) (or `make install-uv`)
+- `make`
+- A web browser for the replay viewer
+- Optional: Docker or Podman for the container path
 
-A concise review loop is: run `make pytest`, `make test`, and `make validate`;
-inspect the result manifest; open the retained replay; then read the stated
-limitations. If the revision or match inputs differ, treat the result as new
-evidence rather than silently extending the existing claim. Read
-[`docs/OPEN_PROBLEMS.md`](docs/OPEN_PROBLEMS.md) alongside this path for the
-limitations and held work that bound the hiring evidence; it is an inventory,
-not an acceptance gate. Forward-looking scope is tracked in
-[`ROADMAP.md`](ROADMAP.md); it is a planning surface, not an acceptance gate.
-
-## Quick start
-
-The project uses [uv](https://docs.astral.sh/uv/) to manage Python dependencies.
+### Install and check
 
 ```bash
 git clone https://github.com/T-Py-T/ants-strategy-agent.git
 cd ants-strategy-agent
 uv sync --all-extras
 
-make pytest
-make test
-make visualize-evidence
+make pytest           # full unit and integration suite
+uv run make test      # one 30-turn, two-player game through the local engine
 ```
 
-`make test` runs a short game through the local engine. The visualization
-command opens the retained replay shown above, including fog of war, score
-history, playback controls, and the full map state.
+`make test` calls `python3` directly, so run it through `uv run` (or activate
+`.venv` first) to use the synced environment.
 
-Docker and a VS Code dev container are also available:
-
-```bash
-make docker-build
-make docker-test
-```
-
-Optional dependency groups let you install only the tools you need:
+Optional dependency groups let you install only what you need:
 
 | Extra | Includes | Use |
 | --- | --- | --- |
@@ -84,10 +69,70 @@ Optional dependency groups let you install only the tools you need:
 | `[analysis]` | pandas, NumPy, SciPy, Matplotlib, and Seaborn | Benchmark analysis and plots |
 | `[dev]` | Test and analysis dependencies plus pre-commit | Complete contributor environment |
 
-## How the bot works
+### Container path (not run for this README)
 
-The default `AdvancedBot` chooses one action for each available ant using a
-priority-based policy:
+```bash
+make docker-build
+make docker-test
+```
+
+Both targets use Podman when it is installed and Docker otherwise. CI builds
+the image and runs `make test` inside it.
+
+## Demo: play a match, then replay one
+
+**1. Play a quick game.** Your bot (`src/bots/bot.py`) takes on RandomBot for
+30 turns on a two-player maze:
+
+```bash
+uv run make test
+```
+
+The run streams per-turn stats and ends with a single machine-readable line:
+
+```text
+RESULT game_id=0 turns=30 winner=tie(player_0,player_1) player_0=bot.py:rank=0,score=1,status=survived player_1=RandomBot.py:rank=0,score=1,status=survived
+```
+
+Thirty turns is a smoke test, not a contest, so a tie is the normal outcome.
+The replay lands in `game_logs/`.
+
+**2. Open the retained four-player replay.** This is the game in the
+screenshot above:
+
+```bash
+# writes results/current-evidence-v1/replay/replay.html without opening a browser
+uv run python visualizer/visualize_locally.py \
+  results/current-evidence-v1/replay/four-player-final.replay --nolaunch
+
+# same file, opened in your default browser (not run for this README)
+make visualize-evidence
+```
+
+**3. Replay your own game** (not run for this README; opens a browser):
+
+```bash
+make visualize-latest
+```
+
+**4. Pick a fight.** Each matchup is a single seeded game (not run for this
+README):
+
+```bash
+make test-against-random
+make test-against-hunter
+make test-vs-xathis
+make test-influence-vs-current
+make test-influence-vs-xathis
+```
+
+`make help` lists every target, including full 1000-turn games, self-play and
+statistical sweeps.
+
+## How the bot thinks
+
+The default `AdvancedBot` gives each free ant exactly one order per turn,
+working down a priority list:
 
 ```text
 game state
@@ -108,80 +153,54 @@ collision-safe orders
     └──► replay and match result
 ```
 
-The policy tracks previously issued orders, food targets, enemy hills,
-exploration state, and planned destinations. Movement is resolved before
-orders are emitted so multiple ants do not choose the same square.
+It remembers issued orders, food targets, enemy hills, exploration state and
+planned destinations. Movement is resolved before orders are sent, so two ants
+never step onto the same square.
 
-The repository also contains `InfluenceBot`, whose historical class name is
-`IForOneWelcomeOurNewInsectOverlords`. It uses influence maps for food,
-unexplored territory, combat safety, defense, and coordinated movement. See
-[docs/STRATEGY_LINEAGE.md](docs/STRATEGY_LINEAGE.md) for its origin and the
-adaptations made for the current engine.
+`InfluenceBot` (historical class name `IForOneWelcomeOurNewInsectOverlords`)
+takes a different approach: influence maps for food, unexplored territory,
+combat safety, defence and coordinated movement. Its origin and the protocol
+adaptations it needed are in
+[docs/STRATEGY_LINEAGE.md](docs/STRATEGY_LINEAGE.md).
 
 ## Bots
 
-| Bot | File | Purpose |
+| Bot | File | Role |
 | --- | --- | --- |
-| `AdvancedBot` | [`src/bots/bot.py`](src/bots/bot.py) | Current default hierarchical strategy |
-| `InfluenceBot` | [`src/bots/influence_bot.py`](src/bots/influence_bot.py) | Recovered influence-map strategy adapted to the current protocol |
-| `XathisBot` | [`src/bots/xathis_bot.py`](src/bots/xathis_bot.py) | Partial Python adaptation used as an algorithmic comparison target |
-| Sample opponents | [`src/sample_bots/`](src/sample_bots) | Random, greedy, hunter, lefty, and other fixed baselines |
+| `AdvancedBot` | [`src/bots/bot.py`](src/bots/bot.py) | Default priority-based strategy |
+| `InfluenceBot` | [`src/bots/influence_bot.py`](src/bots/influence_bot.py) | Recovered influence-map strategy, adapted to the current protocol |
+| `XathisBot` | [`src/bots/xathis_bot.py`](src/bots/xathis_bot.py) | Partial Python adaptation of the 2011 winner, used as a comparison opponent |
+| Sample opponents | [`src/sample_bots/`](src/sample_bots) | Random, greedy, hunter, lefty, hold and other fixed baselines |
 
-The preserved Java Xathis source is under
-[`docs/reference/xathis/`](docs/reference/xathis). Xathis is the comparison
-target for future reinforcement-learning experiments; it is not the default
-bot used by the project.
+The original Java Xathis source is preserved under
+[`docs/reference/xathis/`](docs/reference/xathis) as a reference. `XathisBot`
+is a partial port, so results against it describe that port, not the
+historical leaderboard winner.
 
-## Replays and benchmarks
+## Benchmarks and the retained result packet
 
-Run individual matchups:
-
-```bash
-make test-against-random
-make test-against-hunter
-make test-vs-xathis
-make test-influence-vs-current
-make test-influence-vs-xathis
-```
-
-Run the benchmark suite or its shorter smoke configuration:
+Run a benchmark suite, or its short smoke configuration:
 
 ```bash
-make benchmark SEED=42
-make benchmark-quick SEED=42
-make benchmark-influence SEED=42
+make benchmark-quick SEED=42      # 2 games per matchup, 200-turn cap
+make benchmark SEED=42            # 5 games per matchup, 1000-turn cap (not run for this README)
+make benchmark-influence SEED=42  # InfluenceBot as the bot under test (not run for this README)
 ```
 
-The engine and each bot receive recorded seeds. Repeating a result requires the
-same code revision, map, arguments, bot revisions, engine seed, and player seed.
+`benchmark-quick` took about 40 seconds on a laptop and writes a Markdown
+summary to `benchmark_results/`.
 
-The versioned sample under
-[`results/current-evidence-v1/`](results/current-evidence-v1/) contains:
+[`results/current-evidence-v1/`](results/current-evidence-v1/) is a frozen,
+inspectable packet from one recorded run. It holds the benchmark config,
+machine-readable aggregate and per-game results, raw runner output, the
+four-player replay shown above, an environment record, and a manifest that
+hashes every file. It records 14 games against fixed local opponents, all
+draws. That is the whole observed result: no wins, and no claim that the bot
+is strong or weak. The packet's own
+[README](results/current-evidence-v1/README.md) explains how to reproduce it.
 
-- the benchmark configuration;
-- machine-readable aggregate and per-game results;
-- raw runner output;
-- a replay that opens in the bundled viewer; and
-- a manifest covering the retained files.
-
-Open the newest locally generated replay with:
-
-```bash
-make visualize-latest
-```
-
-## Validation
-
-```bash
-make pytest
-make test
-make validate
-```
-
-The test suite covers strategy utilities, protocol parsing, engine behavior,
-sandboxing, sample opponents, benchmark outputs, replay handling, and complete
-game runs. Contributor setup and the local commit gate are described in
-[CONTRIBUTING.md](CONTRIBUTING.md).
+Repeating any result needs the same code revision, map, arguments, bot
+revisions, engine seed and player seed.
 
 ## Project Structure
 
@@ -199,53 +218,54 @@ results/                # versioned result packets
 docs/reference/xathis/  # preserved historical Xathis source
 ```
 
-## Reinforcement-learning track
+## Roadmap
 
-The current bots are algorithmic. The planned reinforcement-learning track
-will train policies from game trajectories and score them against frozen maps,
-seeds, turn limits, and algorithmic opponents—including Xathis—using the same
-match and replay infrastructure.
+The bots here are algorithmic. A planned reinforcement-learning track would
+train policies from game trajectories and score them against frozen maps,
+seeds, turn limits and the algorithmic opponents, using the same match and
+replay tooling. Nothing in the repository is a trained agent yet. See
+[ROADMAP.md](ROADMAP.md) and [docs/OPEN_PROBLEMS.md](docs/OPEN_PROBLEMS.md)
+for planned and open work.
+
+## Contributing
+
+Ideas worth trying: a smarter combat model, better exploration, a new
+opponent, faster engine paths, or viewer improvements.
+
+1. Fork the repository and create a focused branch.
+2. Set up the local commit gate:
+
+   ```bash
+   uv sync --all-extras
+   uv run --all-extras pre-commit install
+   ```
+
+3. Make the change and add tests for anything executable.
+4. Run `uv run --all-extras pre-commit run --all-files` and `uv run make test`.
+5. Open a pull request against `main` that explains the change and how you
+   validated it. If it changes match behaviour, include the seeds, maps and
+   replay.
+
+The full guide is in [CONTRIBUTING.md](CONTRIBUTING.md). Please report security
+issues privately as described in [SECURITY.md](SECURITY.md).
 
 ## Licensing and provenance
 
 Taylor's original code and the Apache-licensed challenge infrastructure are
-available under [Apache License 2.0](LICENSE). Historical Xathis-derived code
-and Tim Whitson's original influence-map strategy retain their original terms
-and are excluded from the project license where no license grant was found.
+available under the [Apache License 2.0](LICENSE). Historical Xathis-derived
+code and Tim Whitson's original influence-map strategy keep their original
+terms. No license grant was found for them, so they are excluded from the
+project license.
 
 See [docs/LICENSING.md](docs/LICENSING.md) and
 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for the component-by-component
-breakdown. Open and held work is tracked in
-[docs/OPEN_PROBLEMS.md](docs/OPEN_PROBLEMS.md); that inventory is not an
-acceptance gate. Contributions follow [CONTRIBUTING.md](CONTRIBUTING.md), and
-security reports follow [SECURITY.md](SECURITY.md).
+breakdown and exact upstream revisions. Citation metadata is in
+[CITATION.cff](CITATION.cff).
 
-## Evidence status
+## Acknowledgements
 
-> Tip-cite bank: `2799a1c0 #80`
-> Tip-cite bank: `a659d442 #82`
-> Tip-cite bank: `ae2e9d2b #84`
-> Tip-cite bank: `e30472b1 #85`
-> Tip-cite bank: `93273f7b #90`
-
-These examples use the first eight hexadecimal characters of each merged
-`main` commit followed by its PR number. Use the linked code, checks, and result
-packet as the hiring-review evidence path; README prose is not a hiring
-recommendation. This documentation-only update makes no `READY` claim. No
-`READY` status, benchmark score, or hiring outcome is asserted here; the
-Steward resolves a short tip against `main` when a full SHA is needed.
-
-## Keep exploring
-
-Architecture decision index:
-[`docs/adr/README.md`](docs/adr/README.md) —
-planning records, not implementation proof. Dependency-update scaffold:
-[`.github/dependabot.yml`](.github/dependabot.yml) — automation config, not
-readiness proof; wayfinder
-[#103](https://github.com/T-Py-T/ants-strategy-agent/issues/103). Software
-citation metadata:
-[`CITATION.cff`](CITATION.cff). Review routing:
-[`.github/CODEOWNERS`](.github/CODEOWNERS) assigns ownership; it is not a
-`READY` signal. Root license text and SPDX identifier:
-[`LICENSE`](LICENSE); the SPDX line and trailing provenance appendix are not
-part of the license grant.
+- The [AI Challenge](https://github.com/aichallenge/aichallenge) organisers,
+  for the original engine, sample bots, maps and viewer
+- Mathis Lichtenberger (Xathis), whose winning bot and postmortem are
+  preserved in [`docs/reference/xathis/`](docs/reference/xathis)
+- Tim Whitson, author of the original influence-map strategy
