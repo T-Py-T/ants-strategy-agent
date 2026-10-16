@@ -18,17 +18,3 @@ context and any information needed to understand what happened. Do not include
 secrets in the report. Reports will be reviewed as promptly and confidentially
 as practical; security vulnerabilities should follow [SECURITY.md](SECURITY.md)
 instead.
-
-## Documentation status and tip-cites
-
-This code of conduct describes participation expectations only. For provenance,
-use the tip-cite protocol after a pull request is merged:
-
-```text
-T-Py-T/ants-strategy-agent #<PR> <8-char-main-tip>
-```
-
-The tip-cite uses the first eight hexadecimal characters of the merge commit
-on `main`, never a branch tip or an unmerged commit. It identifies the reviewed
-revision; it does not certify conduct, release readiness, benchmark quality,
-security, or any other project outcome. This document makes no `READY` claim.
