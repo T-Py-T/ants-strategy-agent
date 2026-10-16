@@ -1,9 +1,8 @@
 # Contributing
 
 The repository is optimized for reproducible local work and one hosted merge
-gate per pull request. A useful contribution leaves a reviewer—and a hiring
-reader—able to follow the problem, the change, the validation, and the limits
-of the evidence.
+gate per pull request. A useful contribution leaves a reviewer able to follow
+the problem, the change, the validation, and the limits of the evidence.
 
 ## Set up
 
@@ -19,8 +18,7 @@ files from `game_logs/`, local environments, credentials, or editor settings.
 
 Before choosing a larger piece of work, check the
 [`OPEN_PROBLEMS.md`](docs/OPEN_PROBLEMS.md) inventory. It records scoped open
-and held work, including what evidence would close an item; it is not a
-readiness or acceptance gate.
+and held work, including what evidence would close an item.
 
 ## Validate locally
 
@@ -57,8 +55,7 @@ Routine branch pushes should not be used as a test runner.
 
 ## Make the work easy to review
 
-For a contribution that should stand up to technical or hiring review, make
-the path inspectable rather than relying on a headline claim:
+Make the path inspectable rather than relying on a headline claim:
 
 1. State the problem and the scope of the proposed change.
 2. Point to the relevant implementation and explain the key design choice.
@@ -67,24 +64,8 @@ the path inspectable rather than relying on a headline claim:
 4. Call out what was not tested, what the evidence does not establish, and
    what remains open.
 
-This keeps engineering evidence separate from a résumé-style performance
-claim and gives the next contributor a clear starting point.
-
-## Tip-cites
-
-After a pull request is merged, record a compact pointer in the bank or the
-related documentation using the [tip-cite protocol](docs/OPEN_PROBLEMS.md#tip-cite-protocol):
-
-```text
-T-Py-T/ants-strategy-agent #<PR> <8-char-merge-tip>
-```
-
-Use the first eight hexadecimal characters of the **merge commit on `main`**,
-not the branch tip or an unmerged commit. A tip-cite identifies the reviewed
-revision; it does not create a `READY` status or strengthen evidence that was
-not retained. Never treat a merged pull request, passing checks, or a tip-cite
-as a standalone `READY` claim; readiness requires the project’s stated criteria
-and retained evidence.
+This keeps engineering evidence separate from headline performance claims and
+gives the next contributor a clear starting point.
 
 ## Licensing and provenance
 

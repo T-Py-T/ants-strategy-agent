@@ -24,14 +24,8 @@ This project executes locally supplied bot processes. Treat untrusted bots as
 untrusted code: use a disposable environment, keep networking disabled when
 possible, and do not mount credential-bearing directories into the runtime.
 
-## Documentation status
+## See also
 
-This policy covers supported versions, private reporting, and local execution
-risk. It makes no `READY` claim: an acknowledgement or a fix or mitigation
-does not certify release readiness, benchmark quality, hiring outcome, or the
-absence of vulnerabilities.
-
-Tip-cite format, merge-tip rules, and contributor validation expectations live
-in [CONTRIBUTING.md](CONTRIBUTING.md#tip-cites). Open and held work is listed in
-[docs/OPEN_PROBLEMS.md](docs/OPEN_PROBLEMS.md); that inventory is not
-duplicated here.
+Contributor setup and validation expectations live in
+[CONTRIBUTING.md](CONTRIBUTING.md). Open and held work is listed in
+[docs/OPEN_PROBLEMS.md](docs/OPEN_PROBLEMS.md).
