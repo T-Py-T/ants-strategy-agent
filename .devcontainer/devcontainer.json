@@ -36,7 +36,7 @@
             }
         }
     },
-    "postCreateCommand": "uv sync --all-extras",
+    "postCreateCommand": "uv sync --all-extras && pre-commit install",
     "remoteUser": "root",
     "workspaceFolder": "/app"
 }
